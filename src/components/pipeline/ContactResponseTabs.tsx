@@ -4,6 +4,7 @@ import React, { useState } from "react";
 
 import { ContactResponseItem, useGetContactResponsesQuery } from "@/app/redux/api/contactApi";
 import VeryShortSpinnerPrimary from "../ui/loaders/veryShortSpinnerPrimary";
+import CardSwiper from "../ui/swiper/CardSwiper";
 import ContactResponseCard from "./ContactResponseCard";
 import ContactResponseForm from "./ContactResponseForm";
 
@@ -95,9 +96,15 @@ export default function ContactResponseTabs({ contact, onClose }: ContactRespons
             {!isFetching && responses.length === 0 && (
               <p className="text-sm text-gray-500 dark:text-gray-400">No responses logged for {contact.name || "this contact"} yet.</p>
             )}
-            {responses.map((response) => (
-              <ContactResponseCard key={response._id} response={response} onEdit={handleEdit} />
-            ))}
+            {responses.length > 0 && (
+              <CardSwiper
+                items={responses}
+                getKey={(response) => response._id}
+                itemsPerSlide={4}
+                gridCols={2}
+                renderItem={(response) => <ContactResponseCard response={response} onEdit={handleEdit} />}
+              />
+            )}
             {data && data.pagination.page < data.pagination.totalPages && (
               <div className="flex justify-center">
                 <button
