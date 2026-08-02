@@ -4,6 +4,7 @@ import mongoose, { Types } from "mongoose";
 import { authorizeRoles, isAuthenticatedUser } from "@/app/api/middlewares/auth";
 import { logContactActivity } from "@/app/api/utils/activityLog";
 import dbConnect from "@/app/lib/db/connection";
+import "@/app/models/User"; // Registers "User" — required by the populate("createdBy") calls below
 import ContactResponse, {
   ContactResponseActivity,
   contactResponseActivities,

@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/app/lib/db/connection';
 import Pipeline from '@/app/models/Pipeline';
 import Stage from '@/app/models/Stage';
+import User from '@/app/models/User'; // Registers the "User" model — required by Pipeline's populate('user') below
 import { isAuthenticatedUser, authorizeRoles } from '../../middlewares/auth';
 import { z } from 'zod';
 import mongoose from 'mongoose';
@@ -44,6 +46,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
   const session = await mongoose.startSession();
   try {
     await dbConnect();
+    User
     session.startTransaction();
 
     const user = await isAuthenticatedUser(request);

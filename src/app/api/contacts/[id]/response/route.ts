@@ -6,6 +6,7 @@ import { logContactActivity } from "@/app/api/utils/activityLog";
 import dbConnect from "@/app/lib/db/connection";
 import Contact from "@/app/models/Contact";
 import CalendarEvent from "@/app/models/CalendarEvents";
+import "@/app/models/User"; // Registers "User" — required by the populate("createdBy") calls below
 import ContactResponse, {
   ContactResponseActivity,
   contactResponseActivities,

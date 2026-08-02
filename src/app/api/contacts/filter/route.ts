@@ -5,6 +5,7 @@ import Contact, { IContact } from "@/app/models/Contact";
 import mongoose, { FilterQuery } from "mongoose";
 import { authorizeRoles, isAuthenticatedUser } from "../../middlewares/auth";
 import ActivityLog from "@/app/models/ActivityLog";
+import "@/app/models/User"; // Registers "User" — required by the populate("assignedTo.user") call below
 
 interface FilterBody {
   assignedTo?: { userId: string; isNot: boolean }[];

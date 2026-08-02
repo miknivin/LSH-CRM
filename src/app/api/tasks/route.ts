@@ -8,6 +8,7 @@ import dbConnect from "@/app/lib/db/connection";
 import CalendarEvent from "@/app/models/CalendarEvents";
 import Contact from "@/app/models/Contact";
 import Task, { TaskPriority, TaskStatus, TaskType } from "@/app/models/Task";
+import "@/app/models/User"; // Registers "User" — required by the populate() calls below
 
 const allowedPriorities: TaskPriority[] = ["low", "medium", "high"];
 const allowedStatuses: TaskStatus[] = ["open", "in_progress", "done"];

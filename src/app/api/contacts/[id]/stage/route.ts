@@ -1,8 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose, { Types } from 'mongoose';
 import Contact from '@/app/models/Contact';
 import Stage from '@/app/models/Stage';
+import Pipeline from '@/app/models/Pipeline'; // Registers "Pipeline" — required by Contact's pre-save hook
+import User from '@/app/models/User'; // Registers "User" — required by the populate() calls below
 import dbConnect from '@/app/lib/db/connection';
 import { isAuthenticatedUser, authorizeRoles } from '@/app/api/middlewares/auth';
 import { logContactActivity } from '@/app/api/utils/activityLog';
@@ -22,6 +25,8 @@ export async function PATCH(
   try {
     // Connect to MongoDB
     await dbConnect();
+    Pipeline
+    User
 
     // Authenticate user
     let user;

@@ -3,6 +3,7 @@ import { Types } from 'mongoose';
 import dbConnect from '@/app/lib/db/connection';
 import { authorizeRoles, isAuthenticatedUser } from '../../middlewares/auth';
 import LeaveRequest from '@/app/models/Leave';
+import '@/app/models/User'; // Registers "User" — required by the populate() calls below
 import { validateLeaveRequest } from '../../middlewares/validateLeaveCreate';
 
 

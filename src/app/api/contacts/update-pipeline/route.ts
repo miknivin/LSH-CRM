@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Contact, { IContact } from '@/app/models/Contact';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import Pipeline from '@/app/models/Pipeline'; // Registers "Pipeline" — required by Contact's pre-save hook
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import Stage from '@/app/models/Stage'; // Registers "Stage" — required by Contact's pre-save hook
 
 import mongoose from 'mongoose';
 import dbConnect from '@/app/lib/db/connection';
