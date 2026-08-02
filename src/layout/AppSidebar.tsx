@@ -19,7 +19,7 @@ import UsersIcon from "@/components/ui/flowbiteIcons/Users";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/redux/rootReducer";
 import ServicesIcon from "@/components/ui/flowbiteIcons/ServicesIcon";
-import { getLogoSrc } from "@/app/lib/utils/logo";
+import { LOGO_SRC } from "@/app/lib/utils/logo";
 import TaskIcon from "@/components/ui/flowbiteIcons/TaskIcon";
 import InvoiceIcon from "@/components/ui/flowbiteIcons/InvoiceIcon";
 import SettingsIcon from "@/components/ui/flowbiteIcons/SettingsIcon";
@@ -365,39 +365,9 @@ const AppSidebar: React.FC = () => {
       >
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              <Image
-                className="dark:hidden"
-                src={getLogoSrc("/images/logo/logo.svg")}
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <Image
-                className="hidden dark:block"
-                src={getLogoSrc("/images/logo/logo-dark.svg")}
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-            </>
+            <Image src={LOGO_SRC} alt="Logo" width={150} height={40} />
           ) : (
-            <>
-              <Image
-                className="dark:hidden"
-                src={getLogoSrc("/images/logo/logo-icon-light.svg")}
-                alt="Logo"
-                width={32}
-                height={32}
-              />
-              <Image
-                className="hidden dark:block"
-                src={getLogoSrc("/images/logo/logo-icon.svg")}
-                alt="Logo"
-                width={32}
-                height={32}
-              />
-            </>
+            <Image src={LOGO_SRC} alt="Logo" width={32} height={32} />
           )}
         </Link>
       </div>
