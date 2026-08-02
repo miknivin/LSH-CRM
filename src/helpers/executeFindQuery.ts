@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import MongoFilterBuilder from '@/app/classes/MongoFilterBuilder';
 import { executeFilterActions } from '@/helpers/executeFilterActions';
+import { getSuccessStageIds } from '@/app/lib/utils/successStages';
 import mongoose, {  SortOrder } from 'mongoose';
 
 /**
@@ -19,6 +20,9 @@ export async function executeFindQuery(
 
   // enforce tenant isolation
   builder.eq('user', tenantId);
+
+  // populate before any AI-dispatched isConverted/hasSuccessStage/notConverted call
+  builder.setSuccessStageIds(await getSuccessStageIds());
 
   // apply AI filter actions
   executeFilterActions(builder, step.filterActions);

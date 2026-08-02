@@ -129,13 +129,12 @@ function PipelineBoardContent({ pipelineId, filters }: PipelineBoardContentProps
       <div className="relative">
         <div ref={boardRef} className="flex gap-3 overflow-x-auto pb-6 min-h-[70vh] max-w-full">
           <SortableContext items={stageIds} strategy={horizontalListSortingStrategy}>
-            {stages.map((stage, idx) => (
+            {stages.map((stage) => (
               <StageColumn
                 key={stage._id}
                 stage={stage}
                 pipelineId={pipelineId}
                 filters={filters}
-                isFinalThree={idx >= stages.length - 3}
               />
             ))}
           </SortableContext>

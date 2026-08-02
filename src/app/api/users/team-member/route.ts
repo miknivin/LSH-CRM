@@ -5,6 +5,7 @@ import User, { IUser } from "@/app/models/User";
 import dbConnect from "@/app/lib/db/connection";
 import { validateUserInput } from "../../middlewares/validateTeamMember";
 import Contact from "@/app/models/Contact";
+import { getSuccessStageIds } from "@/app/lib/utils/successStages";
 
 type ResponseUser = Pick<IUser, '_id' | 'name' | 'email' | 'role' | 'signupMethod' | 'avatar' | 'uid' | 'phone'>;
 
@@ -191,15 +192,7 @@ export async function GET(req: NextRequest) {
       .limit(limit)
       .lean();
 
-    const defaultClosedStages = [
-      '6858217887f5899a7e6fc6fc',
-      '6858217887f5899a7e6fc6fb',
-      '6858217887f5899a7e6fc6fd',
-    ];
-
-    const closedStageIds: string[] = process.env.SUCCESS_STAGES
-      ? JSON.parse(process.env.SUCCESS_STAGES)
-      : defaultClosedStages;
+    const closedStageIds = await getSuccessStageIds();
 
     const users = await Promise.all(
       usersRaw.map(async (user: any) => {

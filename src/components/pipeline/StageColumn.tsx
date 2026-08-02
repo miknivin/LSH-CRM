@@ -24,7 +24,6 @@ interface StageColumnProps {
   stage: Stage;
   pipelineId: string;
   filters: Omit<GetContactsByStageParams, "pipelineId" | "stageId" | "page" | "limit">;
-  isFinalThree: boolean;
 }
 
 const normalizeContact = (contact: Contact): Contact => ({
@@ -125,7 +124,7 @@ const VirtualizedContactList = memo(function VirtualizedContactList({
   );
 });
 
-function StageColumnComponent({ stage, pipelineId, filters, isFinalThree }: StageColumnProps) {
+function StageColumnComponent({ stage, pipelineId, filters }: StageColumnProps) {
   const { contacts, meta } = useStageView(stage._id);
   const { hydrateStage, requestNextPage } = useBoardActions();
   const [proposalContact, setProposalContact] = useState<Contact | null>(null);
@@ -192,7 +191,7 @@ function StageColumnComponent({ stage, pipelineId, filters, isFinalThree }: Stag
   }, [isFetching, isLoading, meta.hasMore, meta.isLoadingMore, requestNextPage, stage._id]);
 
   return (
-    <SortableStage ref={scrollContainerRef} stage={stage} count={meta.totalCount} isFinalThree={isFinalThree}>
+    <SortableStage ref={scrollContainerRef} stage={stage} count={meta.totalCount} isSuccess={Boolean(stage.isSuccess)}>
       {isLoading || (isFetching && contacts.length === 0) ? (
         <div className="flex justify-center py-10">
           <ShortSpinnerPrimary />

@@ -55,6 +55,7 @@ interface Stage {
   name: string;
   order: number;
   probability: number;
+  isSuccess?: boolean;
 }
 
 interface BatchUpdate {

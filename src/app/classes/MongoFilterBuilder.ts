@@ -1,15 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import  mongoose, { Types } from 'mongoose';
 
-const SUCCESS_STAGES = [
-  new Types.ObjectId("6858217887f5899a7e6fc6fc"),
-  new Types.ObjectId("6858217887f5899a7e6fc6fb"),
-  new Types.ObjectId("6858217887f5899a7e6fc6fd"),
-];
-
 class MongoFilterBuilder {
   private filter: Record<string, any> = {};
   private current: Record<string, any> = this.filter;
+  // Populated by the caller via setSuccessStageIds() before any of the
+  // isConverted/hasSuccessStage/notConverted methods run — see
+  // src/helpers/executeFindQuery.ts, which fetches these from
+  // Stage.find({isSuccess:true}) instead of a hardcoded id list.
+  private successStageIds: Types.ObjectId[] = [];
 
 
 private extractObjectId(input: string): string | null {
@@ -133,6 +132,12 @@ console.log(userId,'userid');
   // Converted (success stage) helpers
   // ────────────────────────────────────────────────
 
+  /** Populate the success-stage id list used by isConverted/hasSuccessStage/notConverted */
+  setSuccessStageIds(ids: (string | Types.ObjectId)[]): this {
+    this.successStageIds = ids.map((id) => new Types.ObjectId(id));
+    return this;
+  }
+
   /** Latest pipeline stage is one of the success stages */
   isConverted(): this {
     this.current.$expr = {
@@ -141,7 +146,7 @@ console.log(userId,'userid');
             vars: { last: { $arrayElemAt: ["$pipelinesActive", -1] } },
             in: "$$last.stage_id"
           }},
-        SUCCESS_STAGES
+        this.successStageIds
       ]
     };
     // Usually want to ensure there is at least one pipeline entry
@@ -151,13 +156,13 @@ console.log(userId,'userid');
 
   /** Has at least one success stage (any position) */
   hasSuccessStage(): this {
-    this.current["pipelinesActive.stage_id"] = { $in: SUCCESS_STAGES };
+    this.current["pipelinesActive.stage_id"] = { $in: this.successStageIds };
     return this;
   }
 
   /** No success stage in any pipeline entry */
   notConverted(): this {
-    this.current["pipelinesActive.stage_id"] = { $nin: SUCCESS_STAGES };
+    this.current["pipelinesActive.stage_id"] = { $nin: this.successStageIds };
     return this;
   }
 

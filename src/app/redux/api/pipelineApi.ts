@@ -13,15 +13,17 @@ interface LeanStage {
   name: string;
   order: number;
   probability: number;
+  isSuccess: boolean;
   created_at: Date;
   updated_at: Date;
 }
 
-// Interface for minimal stage (only name and order)
+// Interface for minimal stage (only name, order, isSuccess)
 interface MinimalStage {
   _id: string;
   name: string;
   order: number;
+  isSuccess: boolean;
 }
 
 // Interface for lean contact
@@ -74,6 +76,7 @@ interface StageRequest {
   name: string;
   order: number;
   probability?: number;
+  isSuccess?: boolean;
 }
 
 // Interface for GET pipelines request parameters

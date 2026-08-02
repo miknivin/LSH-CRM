@@ -6,6 +6,7 @@ interface IStage {
   name: string;
   order: number;
   probability: number;
+  isSuccess: boolean;
   created_at: Date;
   updated_at: Date;
 }
@@ -36,6 +37,10 @@ const stageSchema = new mongoose.Schema<IStageDocument>({
     min: [0, 'Probability must be between 0 and 100'],
     max: [100, 'Probability must be between 0 and 100'],
     default: 50,
+  },
+  isSuccess: {
+    type: Boolean,
+    default: false,
   },
 }, { timestamps: true });
 

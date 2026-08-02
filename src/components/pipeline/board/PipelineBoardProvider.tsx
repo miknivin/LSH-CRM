@@ -20,6 +20,7 @@ interface PipelineStageInput {
   name: string;
   order: number;
   probability?: number;
+  isSuccess?: boolean;
 }
 
 interface StageHydrateInput {
@@ -62,6 +63,7 @@ const normalizeStages = (stages: PipelineStageInput[] | undefined): Stage[] => {
       name: stage.name,
       order: stage.order,
       probability: stage.probability ?? 0,
+      isSuccess: stage.isSuccess ?? false,
     }))
     .sort((a, b) => a.order - b.order);
 };

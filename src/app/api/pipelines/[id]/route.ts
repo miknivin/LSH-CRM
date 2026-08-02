@@ -23,6 +23,7 @@ const updatePipelineSchema = z.object({
         stage_id: z.string().optional(), // Optional for new stages
         name: z.string().trim().min(3).max(50),
         order: z.number().int().min(0),
+        isSuccess: z.boolean().optional(),
       })
     )
     .optional(),
@@ -98,11 +99,12 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
 
       // Prepare bulk write operations for upsert
       const bulkOps = normalizedStages.map(
-        (stage: { stage_id?: string; name: string; order: number }, index: number) => {
+        (stage: { stage_id?: string; name: string; order: number; isSuccess?: boolean }, index: number) => {
           const stageData = {
             pipeline_id: pipelineId,
             name: stage.name.trim(),
             order: stage.order,
+            isSuccess: Boolean(stage.isSuccess),
             updated_at: new Date(),
           };
 

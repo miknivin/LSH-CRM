@@ -16,7 +16,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ pipelin
     }
 
     const stages = await Stage.find({ pipeline_id: pipelineId })
-      .select('name order')
+      .select('name order isSuccess')
       .sort({ order: 1 })
       .lean();
 

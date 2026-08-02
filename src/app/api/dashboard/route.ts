@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authorizeRoles, isAuthenticatedUser } from '../middlewares/auth';
 import Contact from '@/app/models/Contact';
 import dbConnect from '@/app/lib/db/connection';
+import { getSuccessStageIds } from '@/app/lib/utils/successStages';
 import { endOfMonth, startOfMonth, subMonths } from 'date-fns';
 
 interface MonthlyConversionRate {
@@ -40,15 +41,7 @@ export async function GET(req: NextRequest) {
 
     await dbConnect();
 
-    const defaultStages = [
-      '6858217887f5899a7e6fc6fc',
-      '6858217887f5899a7e6fc6fb',
-      '6858217887f5899a7e6fc6fd',
-    ];
-
-    const closedStageIds: string[] = process.env.SUCCESS_STAGES
-      ? JSON.parse(process.env.SUCCESS_STAGES)
-      : defaultStages;
+    const closedStageIds = await getSuccessStageIds();
 
     const isAdmin = user.role === 'admin';
     const contactBaseQuery = isAdmin ? {} : { 'assignedTo.user': user._id };

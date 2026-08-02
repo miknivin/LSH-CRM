@@ -12,6 +12,7 @@ interface LeanStage {
   name: string;
   order: number;
   probability: number;
+  isSuccess: boolean;
   created_at: Date;
   updated_at: Date;
 }

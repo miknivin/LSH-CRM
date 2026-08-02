@@ -62,11 +62,12 @@ export async function POST(req:NextRequest) {
 
     // Create stages if provided
     if (stages && stages.length > 0) {
-      const stageDocs = stages.map((stage: { name: string; order: number; probability: number }) => ({
+      const stageDocs = stages.map((stage: { name: string; order: number; probability: number; isSuccess?: boolean }) => ({
         pipeline_id: pipeline._id,
         name: stage.name.trim(),
         order: stage.order,
         probability: stage.probability,
+        isSuccess: Boolean(stage.isSuccess),
       }));
       await Stage.insertMany(stageDocs);
     }

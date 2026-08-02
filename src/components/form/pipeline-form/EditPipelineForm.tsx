@@ -13,12 +13,13 @@ import styles from "./AddPipelineForm.module.css";
 interface StageInput {
   name: string;
   probability: number | "";
+  isSuccess: boolean;
 }
 
 interface Stage extends StageInput {
-  id: string; 
-  order: number; 
-  stage_id?: string; 
+  id: string;
+  order: number;
+  stage_id?: string;
 }
 
 interface EditPipelineFormProps {
@@ -34,7 +35,7 @@ export default function EditPipelineForm({ pipelineId, onClose }: EditPipelineFo
     userId: user ? user._id : "",
     stages: [] as Stage[],
   });
-  const [stageInput, setStageInput] = useState<StageInput>({ name: "", probability: "" });
+  const [stageInput, setStageInput] = useState<StageInput>({ name: "", probability: "", isSuccess: false });
   const [error, setError] = useState<string | null>(null);
   const [stageError, setStageError] = useState<string | null>(null);
   const [updatePipeline, { isLoading: isUpdating }] = useUpdatePipelineMutation();
@@ -53,6 +54,7 @@ export default function EditPipelineForm({ pipelineId, onClose }: EditPipelineFo
           stage_id: stage._id, // Backend stage ID for updates
           name: stage.name,
           probability: stage.probability, // Convert to percentage
+          isSuccess: Boolean(stage.isSuccess),
           order: stage.order || index + 1,
         })),
       });
@@ -72,8 +74,12 @@ export default function EditPipelineForm({ pipelineId, onClose }: EditPipelineFo
     }));
   };
 
+  const handleStageSuccessToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setStageInput((prev) => ({ ...prev, isSuccess: e.target.checked }));
+  };
+
   const handleStageAdd = () => {
-    const { name, probability } = stageInput;
+    const { name, probability, isSuccess } = stageInput;
     const trimmedName = name.trim();
 
     if (!trimmedName || probability === "") {
@@ -95,6 +101,7 @@ export default function EditPipelineForm({ pipelineId, onClose }: EditPipelineFo
       id: Date.now().toString(), // Unique ID for React DnD
       name: trimmedName,
       probability,
+      isSuccess,
       order: formData.stages.length + 1, // Initial order
     };
 
@@ -102,7 +109,7 @@ export default function EditPipelineForm({ pipelineId, onClose }: EditPipelineFo
       ...prev,
       stages: [...prev.stages, newStage],
     }));
-    setStageInput({ name: "", probability: "" });
+    setStageInput({ name: "", probability: "", isSuccess: false });
     setStageError(null);
   };
 
@@ -112,6 +119,15 @@ export default function EditPipelineForm({ pipelineId, onClose }: EditPipelineFo
       stages: prev.stages
         .filter((stage) => stage.name !== name)
         .map((stage, idx) => ({ ...stage, order: idx + 1 })), // Reassign orders
+    }));
+  };
+
+  const handleStageToggleSuccess = (id: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      stages: prev.stages.map((stage) =>
+        stage.id === id ? { ...stage, isSuccess: !stage.isSuccess } : stage
+      ),
     }));
   };
 
@@ -134,6 +150,7 @@ export default function EditPipelineForm({ pipelineId, onClose }: EditPipelineFo
           name: stage.name,
           order: stage.order,
           probability: typeof stage.probability === "number" ? stage.probability / 100 : Number(stage.probability) / 100, // Convert to 0-1
+          isSuccess: stage.isSuccess,
         })),
       }).unwrap();
       console.log("Pipeline updated:", response.pipeline);
@@ -143,7 +160,7 @@ export default function EditPipelineForm({ pipelineId, onClose }: EditPipelineFo
         userId: formData.userId,
         stages: [],
       });
-      setStageInput({ name: "", probability: "" });
+      setStageInput({ name: "", probability: "", isSuccess: false });
       onClose();
       toast.success("Pipeline and stages updated successfully");
     } catch (err: unknown) {
@@ -219,11 +236,13 @@ export default function EditPipelineForm({ pipelineId, onClose }: EditPipelineFo
                                           ...stage,
                                           order: idx + 1,
                                           probability: stage.probability !== undefined ? stage.probability : 0.5,
+                                          isSuccess: stage.isSuccess ?? false,
                                         })) // Reassign orders and ensure probability is present
                                         .sort((a, b) => a.order - b.order), // Sort after DnD
                                     }))
                 }
                 handleStageRemove={handleStageRemove}
+                handleStageToggleSuccess={handleStageToggleSuccess}
               />
             )}
             <div className="space-y-2">
@@ -247,6 +266,15 @@ export default function EditPipelineForm({ pipelineId, onClose }: EditPipelineFo
                 className={`w-full outline-none text-sm text-gray-800 bg-transparent placeholder:text-gray-400 dark:text-white/90 dark:placeholder:text-white/30 focus:bg-transparent p-2 rounded-md border ${styles.noAutofillBg} border-gray-300 mb-2 dark:border-gray-700`}
                 aria-label="Stage probability"
               />
+              <label className="flex items-center gap-2 mb-2 text-sm text-gray-700 dark:text-gray-300">
+                <input
+                  type="checkbox"
+                  checked={stageInput.isSuccess}
+                  onChange={handleStageSuccessToggle}
+                  className="h-4 w-4 rounded border-gray-300 text-emerald-500 focus:ring-emerald-500"
+                />
+                Success stage
+              </label>
               <Button
                 type="button"
                 onClick={handleStageAdd}
