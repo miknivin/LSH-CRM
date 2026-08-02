@@ -254,16 +254,28 @@ contactSchema.methods.logActivity = async function (
 // Static method to upsert contact
 contactSchema.statics.upsertContact = async function (contactData: Partial<IContact>, userId: Types.ObjectId, session?: ClientSession) {
   const isNewContact = !(await this.exists({ email: contactData.email }).session(session ?? null));
+
+  // A single atomic findOneAndUpdate — rather than the old fetch-then-.save()
+  // pattern — so concurrent upserts for the same email (e.g. two rows in a
+  // bulk import sharing an address, or a duplicate double-submit) can't race
+  // each other into a Mongoose VersionError: there's no window between
+  // reading a document's version and saving it back where another writer
+  // can bump it first.
   const updatedContact = await this.findOneAndUpdate(
     { email: contactData.email },
-    { $set: contactData },
+    {
+      $set: contactData,
+      $push: {
+        activities: {
+          action: isNewContact ? 'CONTACT_CREATED' : 'CONTACT_UPDATED',
+          user: userId,
+          details: { updatedFields: contactData },
+          createdAt: new Date(),
+        },
+      },
+    },
     { new: true, upsert: true, runValidators: true, session }
   );
-
-  // Log activity
-  await updatedContact.logActivity(isNewContact ? 'CONTACT_CREATED' : 'CONTACT_UPDATED', userId, {
-    updatedFields: contactData,
-  });
 
   return updatedContact;
 };

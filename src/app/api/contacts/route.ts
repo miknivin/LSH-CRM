@@ -121,30 +121,41 @@ export async function POST(req: NextRequest) {
           order: 0, // Default order; adjust as needed
         };
 
+        // Batch every mutation onto this document into local pushes, then a
+        // single .save() — chaining separate .save()/.logActivity() calls
+        // here previously raced Contact.upsertContact()'s own internal save
+        // (and each other) into Mongoose VersionErrors, since every .save()
+        // re-checks the document version against whatever's already in the
+        // DB. One save means one version check.
         contact.pipelinesActive.push(pipelineActiveEntry);
-        await contact.save({ session });
+        contact.activities.push({
+          action: "PIPELINE_ADDED",
+          user: new mongoose.Types.ObjectId(userId),
+          details: { pipelineId: pipelineId.toString(), stageId: stageId.toString() },
+          createdAt: new Date(),
+        });
 
-        // Log the PIPELINE_ADDED activity
-        await contact.logActivity("PIPELINE_ADDED", new mongoose.Types.ObjectId(userId), {
-          pipelineId: pipelineId.toString(),
-          stageId: stageId.toString(),
-        }, session);
-
-        // Log ASSIGNED_TO_UPDATED activity if assignedTo was updated
         if (user.role === "team_member") {
-          await contact.logActivity("ASSIGNED_TO_UPDATED", new mongoose.Types.ObjectId(userId), {
-            assignedUserId: user._id,
-          }, session);
+          contact.activities.push({
+            action: "ASSIGNED_TO_UPDATED",
+            user: new mongoose.Types.ObjectId(userId),
+            details: { assignedUserId: user._id },
+            createdAt: new Date(),
+          });
         }
 
-        // Log TAG_ADDED activities for each tag
         if (tags && tags.length > 0) {
           for (const tagName of tags) {
-            await contact.logActivity("TAG_ADDED", new mongoose.Types.ObjectId(userId), {
-              tagName,
-            }, session);
+            contact.activities.push({
+              action: "TAG_ADDED",
+              user: new mongoose.Types.ObjectId(userId),
+              details: { tagName },
+              createdAt: new Date(),
+            });
           }
         }
+
+        await contact.save({ session });
       });
     } finally {
       await session.endSession();
