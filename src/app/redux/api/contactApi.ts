@@ -2,6 +2,7 @@
 import { createApi, fetchBaseQuery, retry } from "@reduxjs/toolkit/query/react";
 import { IContact } from "@/app/models/Contact";
 import { FilterParams } from "@/components/tables/ContactTableOne";
+import { userApi } from "./userApi";
 
 
 export interface ResponseActivity {
@@ -92,6 +93,9 @@ interface ContactRequest {
   userId: string;
   notes?: string;
   tags?: string[];
+  preferredVisitingTime?: string;
+  numberOfPeople?: number | string;
+  preferredNightsAndDays?: string;
 }
 
 interface CreateContactApiResponse {
@@ -134,6 +138,10 @@ interface UpdateContactRequest {
   phone: string;
   notes?: string;
   tags?: { name: string }[]; // Send only name, backend sets user
+  businessName?: string;
+  preferredVisitingTime?: string;
+  numberOfPeople?: number | string;
+  preferredNightsAndDays?: string;
 }
 
 interface UpdateContactApiResponse {
@@ -383,6 +391,18 @@ export const contactApi = createApi({
         body,
       }),
       invalidatesTags: ["Contacts"],
+      // Team member cards show assignedContacts/closedContacts counts
+      // (userApi's "TeamMembers" tag) — a new contact can change those, but
+      // it's a separate RTK Query api slice so invalidatesTags can't reach
+      // it directly.
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(userApi.util.invalidateTags(["TeamMembers"]));
+        } catch {
+          // Contact creation failed — nothing to invalidate.
+        }
+      },
     }),
      bulkImportContacts: builder.mutation<BulkImportContactsResponse, ContactPayload>({
       query: (body) => ({
@@ -391,6 +411,14 @@ export const contactApi = createApi({
         body,
       }),
       invalidatesTags: ["Contacts"],
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(userApi.util.invalidateTags(["TeamMembers"]));
+        } catch {
+          // Bulk import failed outright — nothing to invalidate.
+        }
+      },
     }),
     getContacts: builder.query<FilterContactsResponse, FilterContactsRequest>({
       query: ({ page = 1, limit = 10, keyword = "", filter = {} }) => ({

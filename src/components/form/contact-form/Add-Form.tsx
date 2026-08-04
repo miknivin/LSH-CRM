@@ -32,6 +32,9 @@ export default function AddContactForm({ onClose }: AddContactFormProps) {
     businessName: "",
     stage: defaultStage,
     tags: [] as string[],
+    preferredVisitingTime: "",
+    numberOfPeople: "",
+    preferredNightsAndDays: "",
   });
   const [tagInput, setTagInput] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -94,6 +97,9 @@ export default function AddContactForm({ onClose }: AddContactFormProps) {
         businessName: "",
         stage: stages.length > 0 ? stages[0]._id : "",
         tags: [],
+        preferredVisitingTime: "",
+        numberOfPeople: "",
+        preferredNightsAndDays: "",
       });
       setTagInput("");
       onClose();
@@ -203,6 +209,59 @@ export default function AddContactForm({ onClose }: AddContactFormProps) {
                 </option>
               ))}
             </select>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div>
+            <label
+              htmlFor="preferredVisitingTime"
+              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+            >
+              Preferred Visiting Time
+            </label>
+            <input
+              type="text"
+              id="preferredVisitingTime"
+              name="preferredVisitingTime"
+              value={formData.preferredVisitingTime}
+              onChange={handleInputChange}
+              placeholder="e.g. within 2-3 months"
+              className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="numberOfPeople"
+              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+            >
+              Number Of People
+            </label>
+            <input
+              type="number"
+              id="numberOfPeople"
+              name="numberOfPeople"
+              min="0"
+              value={formData.numberOfPeople}
+              onChange={handleInputChange}
+              className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="preferredNightsAndDays"
+              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+            >
+              Preferred Nights &amp; Days
+            </label>
+            <input
+              type="text"
+              id="preferredNightsAndDays"
+              name="preferredNightsAndDays"
+              value={formData.preferredNightsAndDays}
+              onChange={handleInputChange}
+              placeholder="e.g. 5n/6d"
+              className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+            />
           </div>
         </div>
         <div>

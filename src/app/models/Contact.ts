@@ -59,6 +59,10 @@ export interface IContact extends Document {
   source?: string;
   probability?:number;
   value?:number;
+  // Ad-lead-form fields (e.g. bulk-imported from Facebook/Google lead ads)
+  preferredVisitingTime?: string;
+  numberOfPeople?: number;
+  preferredNightsAndDays?: string;
   // Instance method
   logActivity(
     action: Activity['action'],
@@ -147,6 +151,20 @@ const contactSchema = new Schema<IContact, ContactModel>(
     value:{
       type:Number,
       default:0
+    },
+    preferredVisitingTime: {
+      type: String,
+      trim: true,
+      maxLength: [200, 'Preferred visiting time cannot exceed 200 characters'],
+    },
+    numberOfPeople: {
+      type: Number,
+      min: [0, 'Number of people cannot be negative'],
+    },
+    preferredNightsAndDays: {
+      type: String,
+      trim: true,
+      maxLength: [50, 'Preferred nights and days cannot exceed 50 characters'],
     },
     activities: [
       {

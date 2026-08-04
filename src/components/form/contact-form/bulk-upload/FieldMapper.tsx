@@ -27,7 +27,16 @@ const contactFields: (keyof IContact)[] = [
   "probability",
   "value",
   "tags",
+  "preferredVisitingTime",
+  "numberOfPeople",
+  "preferredNightsAndDays",
 ];
+
+const fieldLabels: Partial<Record<keyof IContact, string>> = {
+  preferredVisitingTime: "Preferred Visiting Time",
+  numberOfPeople: "Number Of People",
+  preferredNightsAndDays: "Preferred Nights & Days",
+};
 
 export default function FieldMapper({
   headers,
@@ -68,7 +77,7 @@ export default function FieldMapper({
                   value={field}
                   disabled={Object.values(fieldMappings).includes(field) && fieldMappings[header] !== field}
                 >
-                  {field.charAt(0).toUpperCase() + field.slice(1)}
+                  {fieldLabels[field] ?? field.charAt(0).toUpperCase() + field.slice(1)}
                 </option>
               ))}
             </select>

@@ -30,6 +30,9 @@ interface ContactData {
   phone: string;
   notes?: string;
   businessName?: string;
+  preferredVisitingTime?: string;
+  numberOfPeople?: string;
+  preferredNightsAndDays?: string;
 }
 
 const ReadOnlyContactDisplay: React.FC<ReadOnlyContactDisplayProps> = ({ contact }) => {
@@ -39,6 +42,9 @@ const ReadOnlyContactDisplay: React.FC<ReadOnlyContactDisplayProps> = ({ contact
     phone: '',
     notes: '',
     businessName: '',
+    preferredVisitingTime: '',
+    numberOfPeople: '',
+    preferredNightsAndDays: '',
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isResponseModalOpen, setIsResponseModalOpen] = useState(false);
@@ -56,6 +62,9 @@ const ReadOnlyContactDisplay: React.FC<ReadOnlyContactDisplayProps> = ({ contact
         phone: contact.phone,
         notes: contact.notes || '',
         businessName: contact.businessName || '',
+        preferredVisitingTime: contact.preferredVisitingTime || '',
+        numberOfPeople: contact.numberOfPeople !== undefined && contact.numberOfPeople !== null ? String(contact.numberOfPeople) : '',
+        preferredNightsAndDays: contact.preferredNightsAndDays || '',
       });
     }
   }, [contact]);
@@ -142,6 +151,50 @@ const ReadOnlyContactDisplay: React.FC<ReadOnlyContactDisplayProps> = ({ contact
           className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
         >
           {contactData.businessName || 'N/A'}
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div>
+          <label
+            htmlFor="preferredVisitingTime"
+            className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-white"
+          >
+            Preferred Visiting Time
+          </label>
+          <div
+            id="preferredVisitingTime"
+            className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+          >
+            {contactData.preferredVisitingTime || 'N/A'}
+          </div>
+        </div>
+        <div>
+          <label
+            htmlFor="numberOfPeople"
+            className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-white"
+          >
+            Number Of People
+          </label>
+          <div
+            id="numberOfPeople"
+            className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+          >
+            {contactData.numberOfPeople || 'N/A'}
+          </div>
+        </div>
+        <div>
+          <label
+            htmlFor="preferredNightsAndDays"
+            className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-white"
+          >
+            Preferred Nights &amp; Days
+          </label>
+          <div
+            id="preferredNightsAndDays"
+            className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+          >
+            {contactData.preferredNightsAndDays || 'N/A'}
+          </div>
         </div>
       </div>
       <div>

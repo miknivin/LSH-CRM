@@ -21,7 +21,24 @@ export async function POST(req: NextRequest) {
     
     const user = await isAuthenticatedUser(req);
  
-    const { name, email, phone, notes, userId, tags = [], stage, businessName } = (req as ExtendedNextRequest).validatedBody!;
+    const {
+      name,
+      email,
+      phone,
+      notes,
+      userId,
+      tags = [],
+      stage,
+      businessName,
+      preferredVisitingTime,
+      numberOfPeople,
+      preferredNightsAndDays,
+    } = (req as ExtendedNextRequest).validatedBody!;
+
+    const parsedNumberOfPeople =
+      numberOfPeople !== undefined && numberOfPeople !== ""
+        ? Number(String(numberOfPeople).replace(/[^\d.]/g, ""))
+        : undefined;
 
     const tagSubdocuments = tags
       ? tags.map((tagName: string) => ({
@@ -50,6 +67,11 @@ export async function POST(req: NextRequest) {
       businessName,
       tags: tagSubdocuments,
       assignedTo, // Include assignedTo in contactData
+      ...(preferredVisitingTime ? { preferredVisitingTime } : {}),
+      ...(parsedNumberOfPeople !== undefined && !Number.isNaN(parsedNumberOfPeople)
+        ? { numberOfPeople: parsedNumberOfPeople }
+        : {}),
+      ...(preferredNightsAndDays ? { preferredNightsAndDays } : {}),
     };
 
     // Define pipeline and stage IDs

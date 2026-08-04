@@ -18,6 +18,9 @@ interface UpdateContactRequest {
   notes?: string;
   tags?: { name: string }[];
   businessName?: string;
+  preferredVisitingTime?: string;
+  numberOfPeople?: number | string;
+  preferredNightsAndDays?: string;
 }
 
 export async function GET(
@@ -161,6 +164,15 @@ export async function PUT(
     if (body.businessName !== undefined && (typeof body.businessName !== 'string' || body.businessName.length > 200)) {
       errors.push('Business name must be a string and not exceed 200 characters if provided');
     }
+    if (body.preferredVisitingTime !== undefined && (typeof body.preferredVisitingTime !== 'string' || body.preferredVisitingTime.length > 200)) {
+      errors.push('Preferred visiting time must be a string and not exceed 200 characters if provided');
+    }
+    if (body.preferredNightsAndDays !== undefined && (typeof body.preferredNightsAndDays !== 'string' || body.preferredNightsAndDays.length > 50)) {
+      errors.push('Preferred nights and days must be a string and not exceed 50 characters if provided');
+    }
+    if (body.numberOfPeople !== undefined && body.numberOfPeople !== '' && Number.isNaN(Number(body.numberOfPeople))) {
+      errors.push('Number of people must be a number if provided');
+    }
     if (
       body.tags !== undefined &&
       (!Array.isArray(body.tags) ||
@@ -226,6 +238,12 @@ export async function PUT(
     contact.phone = body.phone;
     contact.notes = body.notes ?? '';
     contact.businessName=body.businessName??''
+    contact.preferredVisitingTime = body.preferredVisitingTime ?? '';
+    contact.preferredNightsAndDays = body.preferredNightsAndDays ?? '';
+    contact.numberOfPeople =
+      body.numberOfPeople !== undefined && body.numberOfPeople !== ''
+        ? Number(body.numberOfPeople)
+        : undefined;
     // Clear existing tags and add new ones
     contact.tags.splice(0, contact.tags.length);
     if (body.tags) {

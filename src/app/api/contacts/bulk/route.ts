@@ -16,6 +16,9 @@ interface PayloadContact {
   tags?: string;
   isDuplicate?: boolean;
   businessName?: string;
+  preferredVisitingTime?: string;
+  numberOfPeople?: string | number;
+  preferredNightsAndDays?: string;
 }
 
 interface ContactPayload {
@@ -115,12 +118,22 @@ export async function POST(request: NextRequest) {
             }
           }
 
+          const parsedNumberOfPeople =
+            contact.numberOfPeople !== undefined && contact.numberOfPeople !== ""
+              ? Number(String(contact.numberOfPeople).replace(/[^\d.]/g, ""))
+              : undefined;
+
           const contactData: Partial<IContact> = {
             name: contact.name,
             email: contact.email,
             phone: contact.phone,
             businessName: contact.businessName || "Nil",
             source: 'bulk_import',
+            ...(contact.preferredVisitingTime ? { preferredVisitingTime: contact.preferredVisitingTime } : {}),
+            ...(parsedNumberOfPeople !== undefined && !Number.isNaN(parsedNumberOfPeople)
+              ? { numberOfPeople: parsedNumberOfPeople }
+              : {}),
+            ...(contact.preferredNightsAndDays ? { preferredNightsAndDays: contact.preferredNightsAndDays } : {}),
             tags: contact.tags
               ? new mongoose.Types.DocumentArray([
                   {

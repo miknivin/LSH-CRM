@@ -33,6 +33,9 @@ interface ContactFormData {
   phone: string;
   notes?: string;
   businessName?: string;
+  preferredVisitingTime?: string;
+  numberOfPeople?: string;
+  preferredNightsAndDays?: string;
 }
 
 const UpdateContactForm: React.FC<UpdateContactFormProps> = ({ contact }) => {
@@ -48,6 +51,9 @@ const UpdateContactForm: React.FC<UpdateContactFormProps> = ({ contact }) => {
     phone: '',
     notes: '',
     businessName: '',
+    preferredVisitingTime: '',
+    numberOfPeople: '',
+    preferredNightsAndDays: '',
   });
   const [error, setError] = useState<string | null>(null);
   const [selectedStage, setSelectedStage] = useState<string>('');
@@ -66,6 +72,9 @@ const UpdateContactForm: React.FC<UpdateContactFormProps> = ({ contact }) => {
         phone: contact.phone || '',
         notes: contact.notes || '',
         businessName: contact.businessName || '',
+        preferredVisitingTime: contact.preferredVisitingTime || '',
+        numberOfPeople: contact.numberOfPeople !== undefined && contact.numberOfPeople !== null ? String(contact.numberOfPeople) : '',
+        preferredNightsAndDays: contact.preferredNightsAndDays || '',
       });
       const pipelineEntry = Array.isArray(contact.pipelinesActive) && contact.pipelinesActive.length > 0
         ? contact.pipelinesActive.find(entry => entry.pipeline_id?.toString() === DEFAULT_PIPELINE_ID)
@@ -95,6 +104,9 @@ const UpdateContactForm: React.FC<UpdateContactFormProps> = ({ contact }) => {
         phone: formData.phone,
         notes: formData.notes,
         businessName: formData.businessName,
+        preferredVisitingTime: formData.preferredVisitingTime,
+        numberOfPeople: formData.numberOfPeople,
+        preferredNightsAndDays: formData.preferredNightsAndDays,
         tags: contact.tags || [], // Preserve existing tags
       };
 
@@ -222,6 +234,57 @@ const UpdateContactForm: React.FC<UpdateContactFormProps> = ({ contact }) => {
             onChange={handleInputChange}
             className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
           />
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div>
+            <label
+              htmlFor="preferredVisitingTime"
+              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-white"
+            >
+              Preferred Visiting Time
+            </label>
+            <input
+              type="text"
+              id="preferredVisitingTime"
+              name="preferredVisitingTime"
+              value={formData.preferredVisitingTime}
+              onChange={handleInputChange}
+              className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="numberOfPeople"
+              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-white"
+            >
+              Number Of People
+            </label>
+            <input
+              type="number"
+              id="numberOfPeople"
+              name="numberOfPeople"
+              min="0"
+              value={formData.numberOfPeople}
+              onChange={handleInputChange}
+              className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="preferredNightsAndDays"
+              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-white"
+            >
+              Preferred Nights &amp; Days
+            </label>
+            <input
+              type="text"
+              id="preferredNightsAndDays"
+              name="preferredNightsAndDays"
+              value={formData.preferredNightsAndDays}
+              onChange={handleInputChange}
+              className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+            />
+          </div>
         </div>
         <div>
           <label
