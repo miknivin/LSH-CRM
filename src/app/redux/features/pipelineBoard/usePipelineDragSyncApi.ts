@@ -7,8 +7,8 @@ export function usePipelineDragSyncApi() {
   const [batchUpdateContactDrag] = useBatchUpdateContactDragMutation();
 
   const executeBatchUpdate = useCallback(
-    async (updates: DragSyncUpdate[]) => {
-      await batchUpdateContactDrag({ updates }).unwrap();
+    async (updates: DragSyncUpdate[], affectedStageIds: string[]) => {
+      await batchUpdateContactDrag({ updates, affectedStageIds }).unwrap();
     },
     [batchUpdateContactDrag]
   );

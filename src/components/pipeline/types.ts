@@ -53,6 +53,12 @@ export interface DragSyncEvent {
   opId: string;
   update: DragSyncUpdate;
   createdAt: number;
+  // Every stage touched by the drag action this event came from (source +
+  // destination), regardless of whether that particular stage ended up with
+  // an order-changed contact. Needed for cache invalidation scoping — a
+  // stage can lose its last contact without any remaining contact's index
+  // shifting, which would otherwise leave it out of the update list entirely.
+  affectedStageIds: string[];
 }
 
 export interface BoardState {

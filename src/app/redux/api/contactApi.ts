@@ -3,6 +3,7 @@ import { createApi, fetchBaseQuery, retry } from "@reduxjs/toolkit/query/react";
 import { IContact } from "@/app/models/Contact";
 import { FilterParams } from "@/components/tables/ContactTableOne";
 import { userApi } from "./userApi";
+import { pipelineApi } from "./pipelineApi";
 
 
 export interface ResponseActivity {
@@ -125,6 +126,9 @@ interface BatchUpdateContactDragRequest {
     order: number;
     userId?: string;
   }[];
+  // Client-side only, for scoping pipelineApi cache invalidation to the
+  // stages this drag actually touched — never sent to the server.
+  affectedStageIds?: string[];
 }
 
 interface BatchUpdateContactDragResponse {
@@ -445,12 +449,38 @@ export const contactApi = createApi({
       invalidatesTags: ["Contacts"],
     }),
     batchUpdateContactDrag: builder.mutation<BatchUpdateContactDragResponse, BatchUpdateContactDragRequest>({
-      query: (body) => ({
+      query: ({ updates }) => ({
         url: "/contacts/update-drag/batch",
         method: "PATCH",
-        body,
+        body: { updates },
       }),
       invalidatesTags: ["Contacts"],
+      // The pipeline board reads stage contacts from pipelineApi's
+      // getContactsByStage (a separate api slice), so this slice's own
+      // "Contacts" invalidation above doesn't reach it. Scoped to just the
+      // stages this drag touched (source + destination) — not every stage
+      // on the board — using affectedStageIds when the caller provides it,
+      // falling back to the updates' own stageIds otherwise.
+      async onQueryStarted(args, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+
+          const pipelineId = args.updates[0]?.pipelineId;
+          const stageIds = args.affectedStageIds?.length
+            ? args.affectedStageIds
+            : Array.from(new Set(args.updates.map((update) => update.stageId)));
+
+          if (pipelineId && stageIds.length > 0) {
+            dispatch(
+              pipelineApi.util.invalidateTags(
+                stageIds.map((stageId) => ({ type: "Contacts" as const, id: `${pipelineId}-${stageId}` }))
+              )
+            );
+          }
+        } catch {
+          // Drag update failed — nothing to invalidate.
+        }
+      },
     }),
     checkContactDuplicates: builder.mutation<CheckDuplicatesResponse, CheckDuplicatesRequest>({
       query: (body) => ({

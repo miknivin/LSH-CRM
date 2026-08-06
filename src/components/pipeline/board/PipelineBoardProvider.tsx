@@ -90,12 +90,13 @@ const buildSnapshot = (state: BoardState, stageIds: string[]): DragSyncSnapshot 
   };
 };
 
-const createSyncEvents = (updates: DragSyncUpdate[]): DragSyncEvent[] => {
+const createSyncEvents = (updates: DragSyncUpdate[], affectedStageIds: string[]): DragSyncEvent[] => {
   const now = Date.now();
   return updates.map((update, index) => ({
     opId: `${now}-${index}-${update.contactId}-${update.stageId}`,
     update,
     createdAt: now,
+    affectedStageIds,
   }));
 };
 
@@ -192,7 +193,7 @@ const createPipelineBoardStore = (pipelineId: string) =>
 
         if (updates.length > 0) {
           const snapshot = buildSnapshot(previousState, changedStageIds);
-          const events = createSyncEvents(updates);
+          const events = createSyncEvents(updates, changedStageIds);
 
           dispatch({
             type: "SYNC_ENQUEUED",

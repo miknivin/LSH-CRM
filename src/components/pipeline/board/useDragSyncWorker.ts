@@ -12,7 +12,7 @@ interface UseDragSyncWorkerArgs {
   pipelineId: string;
   queue: DragSyncEvent[];
   dispatch: Dispatch<BoardAction>;
-  executeBatchUpdate: (updates: DragSyncUpdate[]) => Promise<unknown>;
+  executeBatchUpdate: (updates: DragSyncUpdate[], affectedStageIds: string[]) => Promise<unknown>;
   executeBatchUpdateKeepAlive?: (updates: DragSyncUpdate[]) => Promise<unknown>;
 }
 
@@ -24,6 +24,14 @@ const coalesceUpdates = (events: DragSyncEvent[]) => {
     byContact.set(event.update.contactId, event.update);
   }
   return Array.from(byContact.values());
+};
+
+const collectAffectedStageIds = (events: DragSyncEvent[]) => {
+  const stageIds = new Set<string>();
+  for (const event of events) {
+    for (const stageId of event.affectedStageIds) stageIds.add(stageId);
+  }
+  return Array.from(stageIds);
 };
 
 export function useDragSyncWorker({
@@ -107,12 +115,13 @@ export function useDragSyncWorker({
 
       const opIds = currentQueue.map((event) => event.opId);
       const updates = coalesceUpdates(currentQueue);
+      const affectedStageIds = collectAffectedStageIds(currentQueue);
 
       inFlightRef.current = true;
       dispatch({ type: "SYNC_STATUS", payload: { status: "syncing" } });
 
       try {
-        await executeBatchUpdate(updates);
+        await executeBatchUpdate(updates, affectedStageIds);
         dispatch({ type: "SYNC_ACKED", payload: { opIds } });
         dispatch({ type: "SYNC_STATUS", payload: { status: "idle" } });
       } catch (error) {
@@ -165,6 +174,11 @@ export function useDragSyncWorker({
   useEffect(() => {
     const tryKeepAliveFlush = () => {
       if (!executeBatchUpdateKeepAlive) return;
+      // A normal (non-keepalive) request is already in flight for the
+      // current queue contents — it isn't tied to the component/tab
+      // lifecycle, so it'll complete on its own. Firing a second, duplicate
+      // request here would just risk a double-logged activity entry.
+      if (inFlightRef.current) return;
 
       const currentQueue = queueRef.current;
       if (currentQueue.length === 0) return;
