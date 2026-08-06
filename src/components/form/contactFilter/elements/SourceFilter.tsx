@@ -1,11 +1,5 @@
 import React from "react";
-
-const sourceOptions = [
-  { value: "facebook", label: "Facebook Leads" },
-  { value: "whatsApp", label: "WhatsApp" },
-  { value: "Excel file", label: "Excel file" },
-  { value: "manual", label: "Manual" },
-];
+import { useGetSourcesQuery } from "@/app/redux/api/sourceApi";
 
 interface SourceFilterProps {
   value: string;
@@ -14,6 +8,9 @@ interface SourceFilterProps {
 }
 
 export default function SourceFilter({ value, onChange, disabled }: SourceFilterProps) {
+  const { data, isFetching } = useGetSourcesQuery();
+  const sources = data?.sources ?? [];
+
   return (
     <div className="mb-4">
       <label htmlFor="contact-source" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
@@ -24,12 +21,12 @@ export default function SourceFilter({ value, onChange, disabled }: SourceFilter
         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
+        disabled={disabled || isFetching}
       >
-        <option value="">Choose a source</option>
-        {sourceOptions.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
+        <option value="">{isFetching ? "Loading sources..." : "Choose a source"}</option>
+        {sources.map((source) => (
+          <option key={source._id} value={source.title}>
+            {source.title}
           </option>
         ))}
       </select>

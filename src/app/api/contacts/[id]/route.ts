@@ -55,11 +55,16 @@ export async function GET(
         { status: 400 }
       );
     }
+    // `activities` is excluded here — it's the legacy embedded audit trail,
+    // superseded by the dedicated, paginated, name-resolved
+    // GET /api/contacts/[id]/activities the frontend actually reads from.
+    // Serving it here too would just be a second, unresolved source of
+    // raw pipeline/stage/user ObjectIds reaching the client for no reason.
     const contact = await Contact.findById(id)
+      .select('-activities')
       .populate('assignedTo.user', 'name')
       .populate('tags.user', 'name')
       .populate('user', 'name')
-      .populate('activities.user', 'name')
       .populate('remarks.createdBy', 'name email')
       .lean();
     if (!contact) {
@@ -273,10 +278,10 @@ export async function PUT(
 
     // Fetch updated contact with populated fields
     const updatedContact = await Contact.findById(id)
+      .select('-activities')
       .populate('assignedTo.user', 'name')
       .populate('tags.user', 'name')
       .populate('user', 'name')
-      .populate('activities.user', 'name')
       .lean();
 
     return NextResponse.json(

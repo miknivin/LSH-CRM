@@ -240,8 +240,11 @@ export function PipelineBoardProvider({ pipelineId, pipelineStages, children }: 
   });
 
   useEffect(() => {
+    // Only the final give-up (after the worker's retries are exhausted)
+    // reaches "error" now — transient attempts sit in "retrying" and stay
+    // silent, since those usually resolve on their own.
     if (syncError.status !== "error" || !syncError.message) return;
-    toast.error("Pipeline sync failed. Latest changes were reverted.");
+    toast.error("Pipeline sync failed. Latest changes were reverted.", { toastId: "pipeline-sync-error" });
   }, [syncError.message, syncError.status]);
 
   return <PipelineBoardStoreContext.Provider value={store}>{children}</PipelineBoardStoreContext.Provider>;

@@ -10,6 +10,7 @@ import { RootState } from "@/app/redux/rootReducer";
 import DateRangePickerUi from "../date/DateRangePicker";
 import { format } from "date-fns";
 import ActivityFilter from "@/components/form/contactFilter/elements/ActivityFilter";
+import SourceFilter from "@/components/form/contactFilter/elements/SourceFilter";
 
 interface OffCanvasProps {
   isOpen: boolean;
@@ -285,23 +286,7 @@ export default function PipelineOffCanvas({ isOpen, onClose }: OffCanvasProps) {
           </div>
 
           {/* Source */}
-          <div className="mb-4">
-            <label htmlFor="countries" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-              Select source
-            </label>
-            <select
-              id="countries"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              value={source}
-              onChange={(e) => setSource(e.target.value)}
-            >
-              <option value="">Choose a source</option>
-              <option value="facebook">Facebook Leads</option>
-              <option value="whatsApp">WhatsApp</option>
-              <option value="Excel file">Excel</option>
-              <option value="manual">Manual</option>
-            </select>
-          </div>
+          <SourceFilter value={source} onChange={setSource} />
 
           {/* Date Range */}
           <div className="mb-4">

@@ -279,6 +279,17 @@ contactSchema.statics.upsertContact = async function (contactData: Partial<ICont
   // each other into a Mongoose VersionError: there's no window between
   // reading a document's version and saving it back where another writer
   // can bump it first.
+  // Fields that carry nested ObjectId references (user/tag/pipeline/stage
+  // refs) rather than plain display values — omitted from the logged
+  // summary so the activity timeline never has to render a bare id for
+  // these. Each of those relationships already gets its own dedicated
+  // activity entry (TAG_ADDED, ASSIGNED_TO_UPDATED, PIPELINE_ADDED, ...)
+  // wherever it's actually the focus of an operation.
+  const ID_BEARING_FIELDS = new Set(['user', 'tags', 'assignedTo', 'pipelinesActive', 'activities', 'remarks']);
+  const loggedFields = Object.fromEntries(
+    Object.entries(contactData).filter(([key]) => !ID_BEARING_FIELDS.has(key))
+  );
+
   const updatedContact = await this.findOneAndUpdate(
     { email: contactData.email },
     {
@@ -287,7 +298,7 @@ contactSchema.statics.upsertContact = async function (contactData: Partial<ICont
         activities: {
           action: isNewContact ? 'CONTACT_CREATED' : 'CONTACT_UPDATED',
           user: userId,
-          details: { updatedFields: contactData },
+          details: { updatedFields: loggedFields },
           createdAt: new Date(),
         },
       },

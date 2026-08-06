@@ -62,6 +62,6 @@ export interface BoardState {
   activeDragContactId: string | null;
   pendingSyncQueue: DragSyncEvent[];
   rollbackByOpId: Record<string, DragSyncSnapshot>;
-  syncStatus: "idle" | "syncing" | "error";
+  syncStatus: "idle" | "syncing" | "retrying" | "error";
   lastSyncError?: string;
 }

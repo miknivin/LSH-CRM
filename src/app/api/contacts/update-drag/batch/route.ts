@@ -4,6 +4,7 @@ import mongoose, { Types } from "mongoose";
 
 import { authorizeRoles, isAuthenticatedUser } from "@/app/api/middlewares/auth";
 import { logContactActivity } from "@/app/api/utils/activityLog";
+import { getPipelineStageNameMap } from "@/app/lib/utils/pipelineStageNames";
 import dbConnect from "@/app/lib/db/connection";
 import Contact from "@/app/models/Contact";
 
@@ -16,23 +17,11 @@ interface BatchUpdateRequest {
 export async function PATCH(req: NextRequest) {
   try {
     const user = await isAuthenticatedUser(req);
-    if (!user) {
-      return NextResponse.json({ success: false, message: "Need to login" }, { status: 400 });
-    }
     const userId = user._id?.toString();
     if (!userId) {
-      return NextResponse.json({ success: false, message: "Invalid user data" }, { status: 401 });
+      return NextResponse.json({ error: "Invalid user data" }, { status: 401 });
     }
-
-    try {
-      authorizeRoles(user, "admin");
-    } catch {
-      try {
-        authorizeRoles(user, "team_member");
-      } catch {
-        return NextResponse.json({ error: "User is neither admin nor team_member" }, { status: 401 });
-      }
-    }
+    authorizeRoles(user, "admin", "team_member");
 
     await dbConnect();
 
@@ -43,100 +32,77 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
-    const dedupedMap = new Map<string, BatchUpdateItem>();
-    for (const update of body.updates ?? []) {
-      dedupedMap.set(`${update.contactId}-${update.pipelineId}`, update);
-    }
-    const updates = Array.from(dedupedMap.values());
-
+    const updates = body.updates ?? [];
     const { contactMap } = await validateBatchUpdates(updates);
 
-    const bulkOps: any[] = [];
-
-    for (const update of updates) {
-      const { contactId, pipelineId, stageId, order } = update;
-      const contact = contactMap.get(contactId);
-      const pipelineObjectId = new Types.ObjectId(pipelineId);
-      const stageObjectId = new Types.ObjectId(stageId);
-
-      const pipelineExists = (contact?.pipelinesActive ?? []).some(
-        (pa: any) => pa.pipeline_id?.toString() === pipelineId
-      );
-
-      if (pipelineExists) {
-        bulkOps.push({
-          updateOne: {
-            filter: { _id: new Types.ObjectId(contactId) },
-            update: {
-              $set: {
-                "pipelinesActive.$[elem].stage_id": stageObjectId,
-                "pipelinesActive.$[elem].order": order,
-              },
-              $currentDate: { updatedAt: true },
-            },
-            arrayFilters: [{ "elem.pipeline_id": pipelineObjectId }],
+    // Every contact on the board already has a pipelinesActive entry for
+    // this pipeline (that's how it got fetched onto the board), so this is
+    // always a same-pipeline stage move — one atomic array-element update,
+    // no branching on whether the entry exists.
+    const bulkOps: any[] = updates.map(({ contactId, pipelineId, stageId, order }) => ({
+      updateOne: {
+        filter: { _id: new Types.ObjectId(contactId) },
+        update: {
+          $set: {
+            "pipelinesActive.$[elem].stage_id": new Types.ObjectId(stageId),
+            "pipelinesActive.$[elem].order": order,
           },
-        });
-      } else {
-        bulkOps.push({
-          updateOne: {
-            filter: { _id: new Types.ObjectId(contactId) },
-            update: {
-              $push: {
-                pipelinesActive: {
-                  pipeline_id: pipelineObjectId,
-                  stage_id: stageObjectId,
-                  order,
-                },
+          $currentDate: { updatedAt: true },
+        },
+        arrayFilters: [{ "elem.pipeline_id": new Types.ObjectId(pipelineId) }],
+      },
+    }));
+
+    const session = await mongoose.startSession();
+    try {
+      await session.withTransaction(async () => {
+        // bulkWrite with one op costs the same as a single updateOne — kept
+        // as a batch because the drag-sync worker on the frontend can
+        // legitimately flush several queued moves in one request (rapid
+        // drags coalesced within its debounce window, or a backlog flushed
+        // after coming back online), not just the common single-card case.
+        await Contact.bulkWrite(bulkOps, { ordered: false, session });
+
+        const { getPipelineName, getStageName } = await getPipelineStageNameMap(
+          updates.map((update) => update.pipelineId),
+          updates.flatMap((update) => [
+            update.stageId,
+            contactMap
+              .get(update.contactId)
+              ?.pipelinesActive?.find((pa: any) => pa.pipeline_id?.toString() === update.pipelineId)?.stage_id?.toString(),
+          ])
+        );
+
+        await Promise.all(
+          updates.map((update) => {
+            const oldStageId = contactMap
+              .get(update.contactId)
+              ?.pipelinesActive?.find((pa: any) => pa.pipeline_id?.toString() === update.pipelineId)?.stage_id?.toString();
+
+            if (oldStageId === update.stageId) return Promise.resolve();
+
+            return logContactActivity({
+              contactId: update.contactId,
+              event: "PIPELINE_STAGE_CHANGED",
+              description: "Pipeline stage changed",
+              performedBy: userId,
+              metadata: {
+                pipelineName: getPipelineName(update.pipelineId),
+                oldStageName: getStageName(oldStageId),
+                newStageName: getStageName(update.stageId),
+                order: update.order,
+                updatedBy: user.name,
               },
-              $currentDate: { updatedAt: true },
-            },
-          },
-        });
-      }
+              session,
+            });
+          })
+        );
+      });
+    } finally {
+      await session.endSession();
     }
 
-    if (bulkOps.length > 0) {
-      const session = await mongoose.startSession();
-      try {
-        await session.withTransaction(async () => {
-          await Contact.bulkWrite(bulkOps, { ordered: false, session });
-          await Promise.all(
-            updates.map((update) => {
-              const contact = contactMap.get(update.contactId);
-              const oldStage = (contact?.pipelinesActive ?? []).find(
-                (pa: any) => pa.pipeline_id?.toString() === update.pipelineId
-              )?.stage_id?.toString();
-
-              if (oldStage === update.stageId) {
-                return Promise.resolve();
-              }
-
-              return logContactActivity({
-                contactId: update.contactId,
-                event: "PIPELINE_STAGE_CHANGED",
-                description: "Pipeline stage changed",
-                performedBy: userId,
-                metadata: {
-                  pipelineId: update.pipelineId,
-                  oldStage,
-                  newStage: update.stageId,
-                  order: update.order,
-                },
-                session,
-              });
-            })
-          );
-        });
-      } finally {
-        await session.endSession();
-      }
-    }
-
-    return NextResponse.json({
-      success: true,
-      updated: bulkOps.length,
-    });
+    return NextResponse.json({ success: true, updated: bulkOps.length });
   } catch (error: any) {
     console.error("Error updating contacts pipeline:", error);
 
@@ -151,9 +117,11 @@ export async function PATCH(req: NextRequest) {
       { error: error.message || "Internal server error" },
       {
         status:
-          error.message?.includes("not found") || error.message?.includes("Invalid")
-            ? 400
-            : 500,
+          error.message?.includes("login") || error.message?.includes("Not allowed")
+            ? 401
+            : error.message?.includes("not found") || error.message?.includes("Invalid") || error.message?.includes("does not belong")
+              ? 400
+              : 500,
       }
     );
   }

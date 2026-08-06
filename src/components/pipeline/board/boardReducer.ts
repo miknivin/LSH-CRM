@@ -255,9 +255,11 @@ export const boardReducer = (state: BoardState, action: BoardAction): BoardState
       const rollbackByOpId = { ...state.rollbackByOpId };
 
       if (!action.payload.final) {
+        // Still within the worker's retry budget — don't surface this as a
+        // user-facing error yet, it may well succeed on the next attempt.
         return {
           ...state,
-          syncStatus: "error",
+          syncStatus: "retrying",
           lastSyncError: action.payload.error,
         };
       }

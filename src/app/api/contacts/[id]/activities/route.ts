@@ -3,6 +3,7 @@ import { PipelineStage, Types } from "mongoose";
 
 import { authorizeRoles, isAuthenticatedUser } from "@/app/api/middlewares/auth";
 import dbConnect from "@/app/lib/db/connection";
+import { backfillActivityNames } from "@/app/lib/utils/backfillActivityNames";
 import ActivityLog from "@/app/models/ActivityLog";
 import Contact from "@/app/models/Contact";
 
@@ -97,6 +98,8 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
       ActivityLog.aggregate([...pipeline, { $count: "total" }]),
     ]);
     const total = countResult[0]?.total ?? 0;
+
+    await backfillActivityNames(activities);
 
     return NextResponse.json(
       {

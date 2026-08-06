@@ -10,6 +10,7 @@ import mongoose from 'mongoose';
 import dbConnect from '@/app/lib/db/connection';
 import { validateUpdatePipelineRequest } from '../../middlewares/validateContactUpdate';
 import { logContactActivity } from '../../utils/activityLog';
+import { getPipelineStageNameMap } from '@/app/lib/utils/pipelineStageNames';
 
 interface UpdatePipelineRequest {
   contactIds: string[];
@@ -39,6 +40,20 @@ export async function PATCH(req: NextRequest) {
     try {
       await session.withTransaction(async () => {
         if (contacts) {
+          const oldStageIds = contacts
+            .map((contact) =>
+              contact.pipelinesActive.find(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (pa: any) => pa.pipeline_id.toString() === pipelineId
+              )?.stage_id?.toString()
+            )
+            .filter((id): id is string => Boolean(id));
+
+          const { getPipelineName, getStageName } = await getPipelineStageNameMap(
+            [pipelineId],
+            [stageId, ...oldStageIds]
+          );
+
           for (const contact of contacts) {
             const existingPipeline = contact.pipelinesActive.find(
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,16 +65,20 @@ export async function PATCH(req: NextRequest) {
               const oldStageId = existingPipeline.stage_id?.toString();
               existingPipeline.stage_id = new mongoose.Types.ObjectId(stageId);
               await contact.logActivity('PIPELINE_STAGE_UPDATED', new mongoose.Types.ObjectId(userId), {
-                pipelineId,
-                oldStageId,
-                stageId,
+                pipelineName: getPipelineName(pipelineId),
+                oldStageName: getStageName(oldStageId),
+                newStageName: getStageName(stageId),
               }, session);
               await logContactActivity({
                 contactId: contact._id,
                 event: 'PIPELINE_STAGE_CHANGED',
                 description: 'Pipeline stage changed',
                 performedBy: userId,
-                metadata: { pipelineId, oldStage: oldStageId, newStage: stageId },
+                metadata: {
+                  pipelineName: getPipelineName(pipelineId),
+                  oldStageName: getStageName(oldStageId),
+                  newStageName: getStageName(stageId),
+                },
                 session,
               });
             } else {
@@ -69,8 +88,8 @@ export async function PATCH(req: NextRequest) {
                 stage_id: new mongoose.Types.ObjectId(stageId),
               });
               await contact.logActivity('PIPELINE_ADDED', new mongoose.Types.ObjectId(userId), {
-                pipelineId,
-                stageId,
+                pipelineName: getPipelineName(pipelineId),
+                stageName: getStageName(stageId),
               }, session);
             }
 

@@ -8,7 +8,7 @@ import dbConnect from "@/app/lib/db/connection";
 import CalendarEvent from "@/app/models/CalendarEvents";
 import Task, { TaskPriority, TaskStatus, TaskType } from "@/app/models/Task";
 import "@/app/models/Contact"; // Registers "Contact" — required by the populate("contactId") calls below
-import "@/app/models/User"; // Registers "User" — required by the populate() calls below
+import User from "@/app/models/User"; // Also used to resolve assignedTo ids to names for activity logging
 
 const allowedPriorities: TaskPriority[] = ["low", "medium", "high"];
 const allowedStatuses: TaskStatus[] = ["open", "in_progress", "done"];
@@ -128,10 +128,12 @@ export async function PATCH(
           throw new Error("Only admins or the task owner can edit task details");
         }
 
+        const oldAssignedToIds = task.assignedTo.map((assignee) => assignee.toString());
+
         const oldValues = {
           title: task.title,
           description: task.description,
-          assignedTo: task.assignedTo.map((assignee) => assignee.toString()),
+          assignedTo: oldAssignedToIds,
           dueDate: task.dueDate,
           dueTime: task.dueTime,
           priority: task.priority,
@@ -143,12 +145,28 @@ export async function PATCH(
         taskId = task._id as Types.ObjectId;
 
         if (task.contactId) {
+          // Swap raw assignee ids for names before logging, so the
+          // frontend activity timeline never has to render a bare ObjectId.
+          const newAssignedToIds = ((update.assignedTo as Types.ObjectId[] | undefined) ?? []).map((assignee) => assignee.toString());
+          let loggedOldValues: Record<string, unknown> = oldValues;
+          let loggedUpdate: Record<string, unknown> = update;
+          if (update.assignedTo !== undefined) {
+            const assignees = await User.find({ _id: { $in: [...oldAssignedToIds, ...newAssignedToIds] } })
+              .select("name")
+              .session(session);
+            const nameById = new Map(assignees.map((assignee) => [String(assignee._id), assignee.name]));
+            const toNames = (ids: string[]) => ids.map((assigneeId) => nameById.get(assigneeId) ?? assigneeId);
+
+            loggedOldValues = { ...oldValues, assignedTo: toNames(oldAssignedToIds) };
+            loggedUpdate = { ...update, assignedTo: toNames(newAssignedToIds) };
+          }
+
           await logContactActivity({
             contactId: task.contactId,
             event: "TASK_UPDATED",
             description: `Task updated: ${task.title}`,
             performedBy: userId,
-            metadata: { taskId: task._id, oldValues, updatedFields: update, addToCalendar: Boolean(body.addToCalendar) },
+            metadata: { taskId: task._id, oldValues: loggedOldValues, updatedFields: loggedUpdate, addToCalendar: Boolean(body.addToCalendar) },
             session,
           });
         }

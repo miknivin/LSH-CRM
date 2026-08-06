@@ -45,6 +45,8 @@ export async function POST(req: NextRequest) {
     if (users.length !== userIds.length) {
       return NextResponse.json({ error: "One or more users not found" }, { status: 404 });
     }
+    const userNameById = new Map(users.map((u) => [String(u._id), u.name]));
+    const getUserName = (userId: string) => userNameById.get(userId) ?? userId;
 
     // Verify contacts exist
     const contacts = await Contact.find({ _id: { $in: contactIds } });
@@ -101,7 +103,7 @@ export async function POST(req: NextRequest) {
               activity: {
                 action: "ASSIGNED_TO_UPDATED",
                 user: currentUser._id!,
-                details: { userIds, assignType },
+                details: { assignedUserNames: userIds.map(getUserName), assignType },
                 createdAt: new Date(),
               },
             };
@@ -127,7 +129,7 @@ export async function POST(req: NextRequest) {
                 activity: {
                   action: "ASSIGNED_TO_UPDATED",
                   user: currentUser._id!,
-                  details: { userIds: [userId], assignType },
+                  details: { assignedUserNames: [getUserName(userId)], assignType },
                   createdAt: new Date(),
                 },
               };
@@ -151,7 +153,7 @@ export async function POST(req: NextRequest) {
               activity: {
                 action: "ASSIGNED_TO_UPDATED",
                 user: currentUser._id!,
-                details: { userIds: [userId], assignType },
+                details: { assignedUserNames: [getUserName(userId)], assignType },
                 createdAt: new Date(),
               },
             };
@@ -173,7 +175,7 @@ export async function POST(req: NextRequest) {
               activity: {
                 action: "ASSIGNED_TO_UPDATED",
                 user: currentUser._id!,
-                details: { userIds: [userId], assignType },
+                details: { assignedUserNames: [getUserName(userId)], assignType },
                 createdAt: new Date(),
               },
             };
@@ -226,8 +228,8 @@ export async function POST(req: NextRequest) {
                     action: "PIPELINE_ADDED",
                     user: currentUser._id!,
                     details: {
-                      pipeline_id: process.env.DEFAULT_PIPELINE!,
-                      stage_id: process.env.DEFAULT_STAGE!,
+                      pipelineName: defaultPipeline?.name,
+                      stageName: defaultStage?.name,
                     },
                     createdAt: new Date(),
                   } as any

@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
         contact.activities.push({
           action: "PIPELINE_ADDED",
           user: new mongoose.Types.ObjectId(userId),
-          details: { pipelineId: pipelineId.toString(), stageId: stageId.toString() },
+          details: { pipelineName: pipeline.name, stageName: stageDoc.name },
           createdAt: new Date(),
         });
 
@@ -163,7 +163,7 @@ export async function POST(req: NextRequest) {
           contact.activities.push({
             action: "ASSIGNED_TO_UPDATED",
             user: new mongoose.Types.ObjectId(userId),
-            details: { assignedUserId: user._id },
+            details: { assignedUserNames: [user.name] },
             createdAt: new Date(),
           });
         }

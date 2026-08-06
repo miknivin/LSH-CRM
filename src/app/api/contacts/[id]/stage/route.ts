@@ -9,6 +9,7 @@ import User from '@/app/models/User'; // Registers "User" — required by the po
 import dbConnect from '@/app/lib/db/connection';
 import { isAuthenticatedUser, authorizeRoles } from '@/app/api/middlewares/auth';
 import { logContactActivity } from '@/app/api/utils/activityLog';
+import { getPipelineStageNameMap } from '@/app/lib/utils/pipelineStageNames';
 
 // Environment variable for the fixed pipeline ID
 const DEFAULT_PIPELINE_ID = process.env.DEFAULT_PIPELINE || '6858217887f5899a7e6fc6f1';
@@ -141,10 +142,15 @@ export async function PATCH(
         const oldStageId = pipelineEntryForUpdate.stage_id.toString();
         pipelineEntryForUpdate.stage_id = new Types.ObjectId(stageId);
 
+        const { getPipelineName, getStageName } = await getPipelineStageNameMap(
+          [DEFAULT_PIPELINE_ID],
+          [oldStageId, stageId]
+        );
+
         await contactForUpdate.logActivity('PIPELINE_STAGE_UPDATED', new Types.ObjectId(userId), {
-          pipelineId: DEFAULT_PIPELINE_ID,
-          oldStageId,
-          newStageId: stageId,
+          pipelineName: getPipelineName(DEFAULT_PIPELINE_ID),
+          oldStageName: getStageName(oldStageId),
+          newStageName: getStageName(stageId),
         }, session);
 
         await logContactActivity({
@@ -153,9 +159,9 @@ export async function PATCH(
           description: 'Pipeline stage changed',
           performedBy: userId,
           metadata: {
-            pipelineId: DEFAULT_PIPELINE_ID,
-            oldStage: oldStageId,
-            newStage: stageId,
+            pipelineName: getPipelineName(DEFAULT_PIPELINE_ID),
+            oldStageName: getStageName(oldStageId),
+            newStageName: getStageName(stageId),
           },
           session,
         });
@@ -166,10 +172,10 @@ export async function PATCH(
 
     // Fetch updated contact with populated fields
     const updatedContact = await Contact.findById(id)
+      .select('-activities')
       .populate('assignedTo.user', 'name')
       .populate('tags.user', 'name')
       .populate('user', 'name')
-      .populate('activities.user', 'name')
       .lean();
 
     return NextResponse.json(
