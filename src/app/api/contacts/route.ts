@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
       tags = [],
       stage,
       businessName,
+      source,
       preferredVisitingTime,
       numberOfPeople,
       preferredNightsAndDays,
@@ -67,6 +68,7 @@ export async function POST(req: NextRequest) {
       businessName,
       tags: tagSubdocuments,
       assignedTo, // Include assignedTo in contactData
+      ...(source ? { source } : {}),
       ...(preferredVisitingTime ? { preferredVisitingTime } : {}),
       ...(parsedNumberOfPeople !== undefined && !Number.isNaN(parsedNumberOfPeople)
         ? { numberOfPeople: parsedNumberOfPeople }

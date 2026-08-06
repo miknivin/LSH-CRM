@@ -16,6 +16,7 @@ interface PayloadContact {
   tags?: string;
   isDuplicate?: boolean;
   businessName?: string;
+  source?: string;
   preferredVisitingTime?: string;
   numberOfPeople?: string | number;
   preferredNightsAndDays?: string;
@@ -26,6 +27,8 @@ interface ContactPayload {
   assignedUsers: string[];
   assignType: 'every' | 'equally' | 'roundRobin';
   addToPipeline: boolean;
+  // Applied to every row that doesn't already have a per-row mapped source.
+  source?: string;
 }
 
 const PIPELINE_ID = new mongoose.Types.ObjectId(process.env.DEFAULT_PIPELINE);
@@ -128,7 +131,7 @@ export async function POST(request: NextRequest) {
             email: contact.email,
             phone: contact.phone,
             businessName: contact.businessName || "Nil",
-            source: 'bulk_import',
+            source: contact.source || payload.source || 'bulk_import',
             ...(contact.preferredVisitingTime ? { preferredVisitingTime: contact.preferredVisitingTime } : {}),
             ...(parsedNumberOfPeople !== undefined && !Number.isNaN(parsedNumberOfPeople)
               ? { numberOfPeople: parsedNumberOfPeople }

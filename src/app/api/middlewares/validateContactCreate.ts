@@ -11,6 +11,7 @@ export interface ExtendedNextRequest extends NextRequest {
     businessName?:string;
     tags?:[];
     stage?:string;
+    source?: string;
     preferredVisitingTime?: string;
     numberOfPeople?: number | string;
     preferredNightsAndDays?: string;

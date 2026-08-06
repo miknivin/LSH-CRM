@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "tunnel": "cloudflared tunnel --url http://localhost:3000",
-    "migrate:contact-order": "ts-node src/app/lib/scripts/migrate-contact-order.ts"
+    "migrate:contact-order": "ts-node src/app/lib/scripts/migrate-contact-order.ts",
+    "seed:sources": "tsx --env-file=.env.local src/app/lib/scripts/seed-sources.ts"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.66",
@@ -89,6 +90,7 @@
     "postcss": "^8",
     "tailwindcss": "^4.0.0",
     "ts-node": "^10.9.2",
+    "tsx": "^4.23.8",
     "typescript": "^5.8.3"
   },
   "overrides": {

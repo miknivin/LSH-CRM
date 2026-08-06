@@ -18,6 +18,7 @@ interface UpdateContactRequest {
   notes?: string;
   tags?: { name: string }[];
   businessName?: string;
+  source?: string;
   preferredVisitingTime?: string;
   numberOfPeople?: number | string;
   preferredNightsAndDays?: string;
@@ -164,6 +165,9 @@ export async function PUT(
     if (body.businessName !== undefined && (typeof body.businessName !== 'string' || body.businessName.length > 200)) {
       errors.push('Business name must be a string and not exceed 200 characters if provided');
     }
+    if (body.source !== undefined && (typeof body.source !== 'string' || body.source.length > 100)) {
+      errors.push('Source must be a string and not exceed 100 characters if provided');
+    }
     if (body.preferredVisitingTime !== undefined && (typeof body.preferredVisitingTime !== 'string' || body.preferredVisitingTime.length > 200)) {
       errors.push('Preferred visiting time must be a string and not exceed 200 characters if provided');
     }
@@ -238,6 +242,7 @@ export async function PUT(
     contact.phone = body.phone;
     contact.notes = body.notes ?? '';
     contact.businessName=body.businessName??''
+    contact.source = body.source ?? contact.source;
     contact.preferredVisitingTime = body.preferredVisitingTime ?? '';
     contact.preferredNightsAndDays = body.preferredNightsAndDays ?? '';
     contact.numberOfPeople =

@@ -8,6 +8,7 @@ import Chip from "@/components/ui/chips/Chip";
 import ShortSpinnerDark from "@/components/ui/loaders/ShortSpinnerDark";
 import VeryShortSpinnerPrimary from "@/components/ui/loaders/veryShortSpinnerPrimary";
 import { DuplicateCheckResult } from "./ContactImportStepper";
+import SourceAutocomplete from "../SourceAutocomplete";
 
 interface BulkUploadAssignProps {
   onClose: () => void;
@@ -20,10 +21,12 @@ interface BulkUploadAssignProps {
   selectedUsers: IUser[];
   assignType: "" | "every" | "equally" | "roundRobin";
   addToPipeline: boolean;
+  source: string;
   onAssignTypeChange: (value: "" | "every" | "equally" | "roundRobin") => void;
   onSelectUser: (member: IUser) => void;
   onRemoveUser: (userId: string | undefined) => void;
   onPipelineToggle: (checked: boolean) => void;
+  onSourceChange: (title: string) => void;
   onSubmit: () => void;
   onBack: () => void;
   error: string | null;
@@ -40,10 +43,12 @@ export default function BulkUploadAssign({
   selectedUsers,
   assignType,
   addToPipeline,
+  source,
   onAssignTypeChange,
   onSelectUser,
   onRemoveUser,
   onPipelineToggle,
+  onSourceChange,
   onSubmit,
   onBack,
   error,
@@ -179,6 +184,11 @@ export default function BulkUploadAssign({
           </label>
 
         </div>
+        <SourceAutocomplete
+          label="Source (applied to contacts without a mapped source)"
+          value={source}
+          onChange={onSourceChange}
+        />
         {error && <p className="text-red-500 text-sm">{error}</p>}
         <div className="flex justify-end space-x-2">
           <Button type="button" onClick={onBack} variant="outline">

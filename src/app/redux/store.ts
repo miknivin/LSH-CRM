@@ -11,6 +11,7 @@ import { proposalApi } from "./api/proposalApi";
 import { aiReportApi } from "./api/aiReportApi";
 import { settingsApi } from "./api/settingsApi";
 import { invoiceApi } from "./api/invoiceApi";
+import { sourceApi } from "./api/sourceApi";
 
 const store = configureStore({
   reducer: rootReducer,
@@ -26,7 +27,8 @@ const store = configureStore({
       proposalApi.middleware,
       aiReportApi.middleware,
       settingsApi.middleware,
-      invoiceApi.middleware
+      invoiceApi.middleware,
+      sourceApi.middleware
     ),
 });
 

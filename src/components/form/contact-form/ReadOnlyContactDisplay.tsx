@@ -30,6 +30,7 @@ interface ContactData {
   phone: string;
   notes?: string;
   businessName?: string;
+  source?: string;
   preferredVisitingTime?: string;
   numberOfPeople?: string;
   preferredNightsAndDays?: string;
@@ -42,6 +43,7 @@ const ReadOnlyContactDisplay: React.FC<ReadOnlyContactDisplayProps> = ({ contact
     phone: '',
     notes: '',
     businessName: '',
+    source: '',
     preferredVisitingTime: '',
     numberOfPeople: '',
     preferredNightsAndDays: '',
@@ -62,6 +64,7 @@ const ReadOnlyContactDisplay: React.FC<ReadOnlyContactDisplayProps> = ({ contact
         phone: contact.phone,
         notes: contact.notes || '',
         businessName: contact.businessName || '',
+        source: contact.source || '',
         preferredVisitingTime: contact.preferredVisitingTime || '',
         numberOfPeople: contact.numberOfPeople !== undefined && contact.numberOfPeople !== null ? String(contact.numberOfPeople) : '',
         preferredNightsAndDays: contact.preferredNightsAndDays || '',
@@ -151,6 +154,20 @@ const ReadOnlyContactDisplay: React.FC<ReadOnlyContactDisplayProps> = ({ contact
           className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
         >
           {contactData.businessName || 'N/A'}
+        </div>
+      </div>
+      <div>
+        <label
+          htmlFor="source"
+          className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-white"
+        >
+          Source
+        </label>
+        <div
+          id="source"
+          className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+        >
+          {contactData.source || 'N/A'}
         </div>
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

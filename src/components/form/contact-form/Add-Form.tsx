@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 import { RootState } from '@/app/redux/rootReducer';
 import { toast } from "react-toastify";
 import { useGetPipelineByIdQuery } from "@/app/redux/api/pipelineApi";
+import SourceAutocomplete from "./SourceAutocomplete";
 
 interface AddContactFormProps {
   onClose: () => void;
@@ -32,6 +33,7 @@ export default function AddContactForm({ onClose }: AddContactFormProps) {
     businessName: "",
     stage: defaultStage,
     tags: [] as string[],
+    source: "",
     preferredVisitingTime: "",
     numberOfPeople: "",
     preferredNightsAndDays: "",
@@ -97,6 +99,7 @@ export default function AddContactForm({ onClose }: AddContactFormProps) {
         businessName: "",
         stage: stages.length > 0 ? stages[0]._id : "",
         tags: [],
+        source: "",
         preferredVisitingTime: "",
         numberOfPeople: "",
         preferredNightsAndDays: "",
@@ -211,6 +214,10 @@ export default function AddContactForm({ onClose }: AddContactFormProps) {
             </select>
           </div>
         </div>
+        <SourceAutocomplete
+          value={formData.source}
+          onChange={(title) => setFormData((prev) => ({ ...prev, source: title }))}
+        />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
             <label

@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from "mongoose";
 
-import ActivityLog from "@/app/models/ActivityLog";
+import ContactResponse from "@/app/models/ContactResponse";
 
 import { ParsedByStageParams } from "./types";
 
+// "Activities" here means logged call-response outcomes (ContactResponse
+// docs — HAD_CONVERSATION, CALLED_NOT_PICKED, etc.), not the generic
+// ActivityLog audit trail — querying ActivityLog.event for these values
+// always returned zero matches, so the filter could never work.
 const buildActivityIdSet = async (activities: string[]) => {
   if (activities.length === 0) return [] as mongoose.Types.ObjectId[];
 
-  const responses = await ActivityLog.find({ event: { $in: activities } })
-    .select("contactId")
-    .lean();
-
-  return responses.map((item) => item.contactId as mongoose.Types.ObjectId);
+  return ContactResponse.distinct('contact', { activity: { $in: activities } }) as Promise<mongoose.Types.ObjectId[]>;
 };
 
 export const buildByStageMatchQuery = async (params: ParsedByStageParams, user: any) => {
@@ -85,10 +85,12 @@ export const buildByStageMatchQuery = async (params: ParsedByStageParams, user: 
         throw new Error("Cannot combine 'No activity recorded' with 'Not No activity recorded'");
       }
 
+      const respondedContactIds = await ContactResponse.distinct('contact');
+
       if (wantsNo) {
-        matchQuery.activities = { $size: 0 };
+        matchQuery._id = matchQuery._id ? { ...matchQuery._id, $nin: respondedContactIds } : { $nin: respondedContactIds };
       } else if (wantsHas) {
-        matchQuery.activities = { $exists: true, $ne: [], $not: { $size: 0 } };
+        matchQuery._id = matchQuery._id ? { ...matchQuery._id, $in: respondedContactIds } : { $in: respondedContactIds };
       }
     }
 

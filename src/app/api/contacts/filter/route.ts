@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Contact, { IContact } from "@/app/models/Contact";
 import mongoose, { FilterQuery } from "mongoose";
 import { authorizeRoles, isAuthenticatedUser } from "../../middlewares/auth";
-import ActivityLog from "@/app/models/ActivityLog";
+import ContactResponse, { contactResponseActivities } from "@/app/models/ContactResponse";
 import "@/app/models/User"; // Registers "User" — required by the populate("assignedTo.user") call below
 
 interface FilterBody {
@@ -138,16 +138,13 @@ export async function POST(req: NextRequest) {
     }
 
     // === ACTIVITIES FILTERING (including NO_ACTIVITY_RECORDED) ===
+    // "Activities" here means logged call-response outcomes (ContactResponse
+    // docs — HAD_CONVERSATION, CALLED_NOT_PICKED, etc.), not the generic
+    // ActivityLog/Contact.activities audit trail. Those are a different enum
+    // entirely, so querying ActivityLog.event for these values always
+    // returned zero matches — the filter could never work.
     if (filter.activities && filter.activities.length > 0) {
-      const validActivities = [
-        'CONTACT_CREATED',
-        'PIPELINE_STAGE_CHANGED',
-        'TASK_CREATED',
-        'TASK_UPDATED',
-        'TASK_DELETED',
-        'REMARK_ADDED',
-        'NO_ACTIVITY_RECORDED', // ← Added here
-      ];
+      const validActivities: string[] = [...contactResponseActivities, 'NO_ACTIVITY_RECORDED'];
 
       const invalidActivities = filter.activities.filter(
         (a) => !validActivities.includes(a.value)
@@ -163,7 +160,7 @@ export async function POST(req: NextRequest) {
       const noActivityFilters = filter.activities.filter(a => a.value === 'NO_ACTIVITY_RECORDED');
       const regularActivityFilters = filter.activities.filter(a => a.value !== 'NO_ACTIVITY_RECORDED');
 
-      // Handle "No activity recorded" (contacts with zero responses)
+      // Handle "No activity recorded" (contacts with zero logged responses)
       if (noActivityFilters.length > 0) {
         const wantsNoActivity = noActivityFilters.some(a => !a.isNot);
         const wantsHasActivity = noActivityFilters.some(a => a.isNot);
@@ -176,14 +173,21 @@ export async function POST(req: NextRequest) {
           );
         }
 
+        const respondedContactIds = await ContactResponse.distinct('contact');
+        const respondedIdSet = new Set(respondedContactIds.map((id) => id.toString()));
+
         if (wantsNoActivity) {
-          searchQuery.activities = { $size: 0 };
+          searchQuery._id = searchQuery._id?.$in
+            ? { $in: (searchQuery._id.$in as mongoose.Types.ObjectId[]).filter(id => !respondedIdSet.has(id.toString())) }
+            : { $nin: respondedContactIds };
         } else if (wantsHasActivity) {
-          searchQuery.activities = { $exists: true, $ne: [], $not: { $size: 0 } };
+          searchQuery._id = searchQuery._id?.$in
+            ? { $in: (searchQuery._id.$in as mongoose.Types.ObjectId[]).filter(id => respondedIdSet.has(id.toString())) }
+            : { $in: respondedContactIds };
         }
       }
 
-      // Handle regular activities (HAD_CONVERSATION, etc.)
+      // Handle specific call-response activities (HAD_CONVERSATION, etc.)
       if (regularActivityFilters.length > 0) {
         const includeActivities = regularActivityFilters
           .filter((a) => !a.isNot)
@@ -192,34 +196,27 @@ export async function POST(req: NextRequest) {
           .filter((a) => a.isNot)
           .map((a) => a.value);
 
-        let includeContactIds: mongoose.Types.ObjectId[] = [];
-        let excludeContactIds: mongoose.Types.ObjectId[] = [];
-
         if (includeActivities.length > 0) {
-          const responses = await ActivityLog.find({ event: { $in: includeActivities } })
-            .select("contactId")
-            .lean();
-          includeContactIds = responses.map(r => r.contactId as mongoose.Types.ObjectId);
+          const includeContactIds = await ContactResponse.distinct('contact', { activity: { $in: includeActivities } });
 
           if (includeContactIds.length === 0) {
             searchQuery._id = { $in: [] }; // No matches → empty result
           } else {
+            const includeIdSet = new Set(includeContactIds.map((id) => id.toString()));
             searchQuery._id = searchQuery._id?.$in
-              ? { $in: includeContactIds.filter(id => (searchQuery._id as any).$in.includes(id)) }
+              ? { $in: (searchQuery._id.$in as mongoose.Types.ObjectId[]).filter(id => includeIdSet.has(id.toString())) }
               : { $in: includeContactIds };
           }
         }
 
         if (excludeActivities.length > 0) {
-          const responses = await ActivityLog.find({ event: { $in: excludeActivities } })
-            .select("contactId")
-            .lean();
-          excludeContactIds = responses.map(r => r.contactId as mongoose.Types.ObjectId);
+          const excludeContactIds = await ContactResponse.distinct('contact', { activity: { $in: excludeActivities } });
 
           if (excludeContactIds.length > 0) {
+            const excludeIdSet = new Set(excludeContactIds.map((id) => id.toString()));
             if (searchQuery._id?.$in) {
               searchQuery._id.$in = (searchQuery._id.$in as mongoose.Types.ObjectId[]).filter(
-                id => !excludeContactIds.includes(id)
+                id => !excludeIdSet.has(id.toString())
               );
               if ((searchQuery._id.$in as any[]).length === 0) {
                 searchQuery._id = { $in: [] };

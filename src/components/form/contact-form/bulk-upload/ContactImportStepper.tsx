@@ -42,6 +42,7 @@ export default function ContactImportStepper({ onClose }: ContactImportStepperPr
   const [assignType, setAssignType] = useState<'' | 'every' | 'equally' | 'roundRobin'>('roundRobin');
   const [selectedUsers, setSelectedUsers] = useState<IUser[]>([]);
   const [addToPipeline, setAddToPipeline] = useState(true);
+  const [source, setSource] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [duplicateCheckResult, setDuplicateCheckResult] = useState<DuplicateCheckResult | null>(null);
   const [duplicateCheckError, setDuplicateCheckError] = useState<string | null>(null);
@@ -97,6 +98,11 @@ export default function ContactImportStepper({ onClose }: ContactImportStepperPr
   // Handle pipeline toggle
   const handlePipelineToggle = (checked: boolean) => {
     setAddToPipeline(checked);
+  };
+
+  // Handle default source change
+  const handleSourceChange = (title: string) => {
+    setSource(title);
   };
 
   // Handle backward navigation
@@ -193,6 +199,7 @@ export default function ContactImportStepper({ onClose }: ContactImportStepperPr
       assignedUsers: selectedUsers.map((user) => user._id).filter((id): id is string => !!id),
       assignType,
       addToPipeline,
+      source,
     };
 
     // Validate contacts before submission
@@ -260,10 +267,12 @@ export default function ContactImportStepper({ onClose }: ContactImportStepperPr
             selectedUsers={selectedUsers}
             assignType={assignType}
             addToPipeline={addToPipeline}
+            source={source}
             onAssignTypeChange={handleAssignTypeChange}
             onSelectUser={handleSelectUser}
             onRemoveUser={handleRemoveUser}
             onPipelineToggle={handlePipelineToggle}
+            onSourceChange={handleSourceChange}
             onSubmit={handleSubmit}
             onBack={handleBack}
             error={error || duplicateCheckError}

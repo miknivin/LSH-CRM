@@ -21,6 +21,7 @@ import TaskTabs from '@/components/pipeline/TaskTabs';
 import TaskCard from '@/components/pipeline/TaskCard';
 import ContactResponseTabs from '@/components/pipeline/ContactResponseTabs';
 import ContactResponseCard from '@/components/pipeline/ContactResponseCard';
+import SourceAutocomplete from './SourceAutocomplete';
 import { useModal } from '@/hooks/useModal';
 
 interface UpdateContactFormProps {
@@ -33,6 +34,7 @@ interface ContactFormData {
   phone: string;
   notes?: string;
   businessName?: string;
+  source?: string;
   preferredVisitingTime?: string;
   numberOfPeople?: string;
   preferredNightsAndDays?: string;
@@ -51,6 +53,7 @@ const UpdateContactForm: React.FC<UpdateContactFormProps> = ({ contact }) => {
     phone: '',
     notes: '',
     businessName: '',
+    source: '',
     preferredVisitingTime: '',
     numberOfPeople: '',
     preferredNightsAndDays: '',
@@ -72,6 +75,7 @@ const UpdateContactForm: React.FC<UpdateContactFormProps> = ({ contact }) => {
         phone: contact.phone || '',
         notes: contact.notes || '',
         businessName: contact.businessName || '',
+        source: contact.source || '',
         preferredVisitingTime: contact.preferredVisitingTime || '',
         numberOfPeople: contact.numberOfPeople !== undefined && contact.numberOfPeople !== null ? String(contact.numberOfPeople) : '',
         preferredNightsAndDays: contact.preferredNightsAndDays || '',
@@ -104,6 +108,7 @@ const UpdateContactForm: React.FC<UpdateContactFormProps> = ({ contact }) => {
         phone: formData.phone,
         notes: formData.notes,
         businessName: formData.businessName,
+        source: formData.source,
         preferredVisitingTime: formData.preferredVisitingTime,
         numberOfPeople: formData.numberOfPeople,
         preferredNightsAndDays: formData.preferredNightsAndDays,
@@ -235,6 +240,11 @@ const UpdateContactForm: React.FC<UpdateContactFormProps> = ({ contact }) => {
             className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
           />
         </div>
+        <SourceAutocomplete
+          label="Source"
+          value={formData.source || ''}
+          onChange={(title) => setFormData((prev) => ({ ...prev, source: title }))}
+        />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
             <label

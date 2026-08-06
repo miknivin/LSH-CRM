@@ -93,6 +93,7 @@ interface ContactRequest {
   userId: string;
   notes?: string;
   tags?: string[];
+  source?: string;
   preferredVisitingTime?: string;
   numberOfPeople?: number | string;
   preferredNightsAndDays?: string;
@@ -202,6 +203,7 @@ interface ContactPayload {
   assignedUsers: string[];
   assignType: "every" | "equally" | "roundRobin";
   addToPipeline: boolean;
+  source?: string;
 }
 
 interface CheckDuplicatesRequest {
