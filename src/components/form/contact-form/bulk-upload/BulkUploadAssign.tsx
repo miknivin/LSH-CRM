@@ -185,7 +185,7 @@ export default function BulkUploadAssign({
 
         </div>
         <SourceAutocomplete
-          label="Source (applied to contacts without a mapped source)"
+          label="Source"
           value={source}
           onChange={onSourceChange}
         />

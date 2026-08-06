@@ -60,7 +60,7 @@ export default function FieldMapper({
           <div key={header} className="mb-4">
             <label
               htmlFor={`field-map-${header}`}
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white break-words"
             >
               {header}
             </label>
