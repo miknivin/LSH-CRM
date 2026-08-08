@@ -62,7 +62,7 @@ function SortableStageComponent(
         <h4 className={`font-medium text-sm ${isSuccess ? "text-white dark:text-white" : "text-gray-800 dark:text-white/90"}`}>
           {stage.name}
         </h4>
-        <p className="font-light text-xs text-white dark:text-white">{count} contacts</p>
+        <p className={`font-light text-xs ${isSuccess ? "text-white dark:text-white" : "text-gray-800 dark:text-white/90"}`}>{count} contacts</p>
 
         {showShuffleButton && (
           <div>
