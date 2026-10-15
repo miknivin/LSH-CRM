@@ -175,8 +175,13 @@ export async function PUT(
     if (body.source !== undefined && (typeof body.source !== 'string' || body.source.length > 100)) {
       errors.push('Source must be a string and not exceed 100 characters if provided');
     }
-    if (body.businessType !== undefined && !['B2B', 'B2C'].includes(body.businessType)) {
-      errors.push('Business type must be either B2B or B2C if provided');
+    if (body.businessType !== undefined) {
+      const normalizedBusinessType = String(body.businessType).trim().toUpperCase();
+      if (!['B2B', 'B2C'].includes(normalizedBusinessType)) {
+        errors.push('Business type must be either B2B or B2C if provided');
+      } else {
+        body.businessType = normalizedBusinessType as 'B2B' | 'B2C';
+      }
     }
     if (body.city !== undefined && (typeof body.city !== 'string' || body.city.length > 100)) {
       errors.push('City must be a string and not exceed 100 characters if provided');

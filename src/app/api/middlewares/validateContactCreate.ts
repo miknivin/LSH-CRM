@@ -41,12 +41,16 @@ export async function validateContactRequest(req: ExtendedNextRequest) {
       );
     }
 
-    // Validate businessType enum
-    if (body.businessType && !["B2B", "B2C"].includes(body.businessType)) {
-      return NextResponse.json(
-        { error: "Invalid businessType: must be B2B or B2C" },
-        { status: 400 }
-      );
+    // Validate businessType enum (case-insensitive; normalized to uppercase)
+    if (body.businessType) {
+      const normalizedBusinessType = String(body.businessType).trim().toUpperCase();
+      if (!["B2B", "B2C"].includes(normalizedBusinessType)) {
+        return NextResponse.json(
+          { error: "Invalid businessType: must be B2B or B2C" },
+          { status: 400 }
+        );
+      }
+      body.businessType = normalizedBusinessType;
     }
 
     // Attach validated body to request for use in handler
