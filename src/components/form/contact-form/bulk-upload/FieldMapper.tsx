@@ -36,6 +36,7 @@ const contactFields: (keyof IContact)[] = [
 
 const fieldLabels: Partial<Record<keyof IContact, string>> = {
   businessType: "Business Type (B2B/B2C)",
+  city: "City",
   preferredVisitingTime: "Preferred Visiting Time",
   numberOfPeople: "Number Of People",
   preferredNightsAndDays: "Preferred Nights & Days",
