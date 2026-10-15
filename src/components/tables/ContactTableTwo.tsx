@@ -41,6 +41,12 @@ const ContactTableTwo: React.FC = () => {
                 Phone number
               </th>
               <th scope="col" className="px-5 py-3">
+                Business Type
+              </th>
+              <th scope="col" className="px-5 py-3">
+                City
+              </th>
+              <th scope="col" className="px-5 py-3">
                 Tags
               </th>
               <th scope="col" className="px-5 py-3">
@@ -54,7 +60,7 @@ const ContactTableTwo: React.FC = () => {
           <tbody>
             {isLoading && (
               <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                <td colSpan={5} className="px-5 py-4 text-center">
+                <td colSpan={7} className="px-5 py-4 text-center">
                   <div className="w-full flex justify-center">
                     <ShortSpinnerPrimary />
                   </div>
@@ -63,14 +69,14 @@ const ContactTableTwo: React.FC = () => {
             )}
             {error && (
               <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                <td colSpan={5} className="px-5 py-4 text-center text-red-500">
+                <td colSpan={7} className="px-5 py-4 text-center text-red-500">
                   {getErrorMessage(error)}
                 </td>
               </tr>
             )}
             {!isLoading && !error && data?.contacts?.length === 0 && (
               <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                <td colSpan={5} className="px-5 py-4 text-center">
+                <td colSpan={7} className="px-5 py-4 text-center">
                   No contacts found
                 </td>
               </tr>
@@ -98,6 +104,8 @@ const ContactTableTwo: React.FC = () => {
                     </div>
                   </th>
                   <td className="px-5 py-4">{contact.phone}</td>
+                  <td className="px-5 py-4">{contact.businessType || 'N/A'}</td>
+                  <td className="px-5 py-4">{contact.city || 'N/A'}</td>
                   <td className="px-5 py-4">
                     <div className="flex flex-wrap gap-1">
                       {contact.tags.length > 0 ? (

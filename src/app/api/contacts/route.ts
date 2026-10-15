@@ -30,6 +30,8 @@ export async function POST(req: NextRequest) {
       tags = [],
       stage,
       businessName,
+      businessType,
+      city,
       source,
       preferredVisitingTime,
       numberOfPeople,
@@ -66,6 +68,8 @@ export async function POST(req: NextRequest) {
       notes,
       user: new mongoose.Types.ObjectId(userId),
       businessName,
+      ...(businessType ? { businessType } : {}),
+      ...(city ? { city } : {}),
       tags: tagSubdocuments,
       assignedTo, // Include assignedTo in contactData
       ...(source ? { source } : {}),

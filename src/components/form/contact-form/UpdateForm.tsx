@@ -34,6 +34,8 @@ interface ContactFormData {
   phone: string;
   notes?: string;
   businessName?: string;
+  businessType?: '' | 'B2B' | 'B2C';
+  city?: string;
   source?: string;
   preferredVisitingTime?: string;
   numberOfPeople?: string;
@@ -53,6 +55,8 @@ const UpdateContactForm: React.FC<UpdateContactFormProps> = ({ contact }) => {
     phone: '',
     notes: '',
     businessName: '',
+    businessType: '',
+    city: '',
     source: '',
     preferredVisitingTime: '',
     numberOfPeople: '',
@@ -75,6 +79,8 @@ const UpdateContactForm: React.FC<UpdateContactFormProps> = ({ contact }) => {
         phone: contact.phone || '',
         notes: contact.notes || '',
         businessName: contact.businessName || '',
+        businessType: contact.businessType || '',
+        city: contact.city || '',
         source: contact.source || '',
         preferredVisitingTime: contact.preferredVisitingTime || '',
         numberOfPeople: contact.numberOfPeople !== undefined && contact.numberOfPeople !== null ? String(contact.numberOfPeople) : '',
@@ -87,7 +93,7 @@ const UpdateContactForm: React.FC<UpdateContactFormProps> = ({ contact }) => {
     }
   }, [contact, DEFAULT_PIPELINE_ID]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -108,6 +114,8 @@ const UpdateContactForm: React.FC<UpdateContactFormProps> = ({ contact }) => {
         phone: formData.phone,
         notes: formData.notes,
         businessName: formData.businessName,
+        businessType: formData.businessType || undefined,
+        city: formData.city,
         source: formData.source,
         preferredVisitingTime: formData.preferredVisitingTime,
         numberOfPeople: formData.numberOfPeople,
@@ -224,21 +232,58 @@ const UpdateContactForm: React.FC<UpdateContactFormProps> = ({ contact }) => {
             required
           />
         </div>
-        <div>
-          <label
-            htmlFor="businessName"
-            className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-white"
-          >
-            Business Name
-          </label>
-          <input
-            type="text"
-            id="businessName"
-            name="businessName"
-            value={formData.businessName}
-            onChange={handleInputChange}
-            className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-          />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div>
+            <label
+              htmlFor="businessName"
+              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-white"
+            >
+              Business Name
+            </label>
+            <input
+              type="text"
+              id="businessName"
+              name="businessName"
+              value={formData.businessName}
+              onChange={handleInputChange}
+              className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="businessType"
+              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-white"
+            >
+              Business Type
+            </label>
+            <select
+              id="businessType"
+              name="businessType"
+              value={formData.businessType}
+              onChange={handleInputChange}
+              className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
+            >
+              <option value="">Select type</option>
+              <option value="B2B">B2B</option>
+              <option value="B2C">B2C</option>
+            </select>
+          </div>
+          <div>
+            <label
+              htmlFor="city"
+              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-white"
+            >
+              City
+            </label>
+            <input
+              type="text"
+              id="city"
+              name="city"
+              value={formData.city}
+              onChange={handleInputChange}
+              className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+            />
+          </div>
         </div>
         <SourceAutocomplete
           label="Source"

@@ -16,6 +16,8 @@ interface PayloadContact {
   tags?: string;
   isDuplicate?: boolean;
   businessName?: string;
+  businessType?: string;
+  city?: string;
   source?: string;
   preferredVisitingTime?: string;
   numberOfPeople?: string | number;
@@ -131,6 +133,10 @@ export async function POST(request: NextRequest) {
             email: contact.email,
             phone: contact.phone,
             businessName: contact.businessName || "Nil",
+            ...(contact.businessType && ["B2B", "B2C"].includes(contact.businessType.trim().toUpperCase())
+              ? { businessType: contact.businessType.trim().toUpperCase() as 'B2B' | 'B2C' }
+              : {}),
+            ...(contact.city ? { city: contact.city } : {}),
             source: contact.source || payload.source || 'bulk_import',
             ...(contact.preferredVisitingTime ? { preferredVisitingTime: contact.preferredVisitingTime } : {}),
             ...(parsedNumberOfPeople !== undefined && !Number.isNaN(parsedNumberOfPeople)

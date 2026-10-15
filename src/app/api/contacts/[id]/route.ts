@@ -18,6 +18,8 @@ interface UpdateContactRequest {
   notes?: string;
   tags?: { name: string }[];
   businessName?: string;
+  businessType?: 'B2B' | 'B2C';
+  city?: string;
   source?: string;
   preferredVisitingTime?: string;
   numberOfPeople?: number | string;
@@ -173,6 +175,12 @@ export async function PUT(
     if (body.source !== undefined && (typeof body.source !== 'string' || body.source.length > 100)) {
       errors.push('Source must be a string and not exceed 100 characters if provided');
     }
+    if (body.businessType !== undefined && !['B2B', 'B2C'].includes(body.businessType)) {
+      errors.push('Business type must be either B2B or B2C if provided');
+    }
+    if (body.city !== undefined && (typeof body.city !== 'string' || body.city.length > 100)) {
+      errors.push('City must be a string and not exceed 100 characters if provided');
+    }
     if (body.preferredVisitingTime !== undefined && (typeof body.preferredVisitingTime !== 'string' || body.preferredVisitingTime.length > 200)) {
       errors.push('Preferred visiting time must be a string and not exceed 200 characters if provided');
     }
@@ -202,7 +210,7 @@ export async function PUT(
     }
 
     // Find the contact based on role
-    const contactQuery = isAdmin ? { _id: id } : { _id: id, user: user._id };
+    const contactQuery = isAdmin ? { _id: id } : { _id: id, 'assignedTo.user': user._id };
     const contact = await Contact.findOne(contactQuery);
     if (!contact) {
       return NextResponse.json(
@@ -247,6 +255,8 @@ export async function PUT(
     contact.phone = body.phone;
     contact.notes = body.notes ?? '';
     contact.businessName=body.businessName??''
+    contact.businessType = body.businessType ?? contact.businessType;
+    contact.city = body.city ?? contact.city;
     contact.source = body.source ?? contact.source;
     contact.preferredVisitingTime = body.preferredVisitingTime ?? '';
     contact.preferredNightsAndDays = body.preferredNightsAndDays ?? '';

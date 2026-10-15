@@ -214,7 +214,7 @@ const ContactTableOne: React.FC = () => {
 
   const isAdmin = user && user.role === "admin";
   const canGenerateProposal = user && ["admin", "team_member"].includes(user.role);
-  const columnCount = (isAdmin ? 1 : 0) + 1 + 1 + 1 + (isAdmin ? 1 : 0) + 1 + 1 + (canGenerateProposal ? 1 : 0);
+  const columnCount = (isAdmin ? 1 : 0) + 1 + 1 + 1 + 1 + 1 + (isAdmin ? 1 : 0) + 1 + 1 + (canGenerateProposal ? 1 : 0);
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
@@ -288,6 +288,12 @@ const ContactTableOne: React.FC = () => {
               </th>
               <th scope="col" className="px-3 py-2">
                 Phone number
+              </th>
+              <th scope="col" className="px-3 py-2">
+                Business Type
+              </th>
+              <th scope="col" className="px-3 py-2">
+                City
               </th>
               <th scope="col" colSpan={1} className="px-3 py-2 ">
                 Tags
@@ -367,6 +373,8 @@ const ContactTableOne: React.FC = () => {
                     </div>
                   </th>
                   <td className="px-3 py-2">{contact.phone}</td>
+                  <td className="px-3 py-2">{contact.businessType || "N/A"}</td>
+                  <td className="px-3 py-2">{contact.city || "N/A"}</td>
                   <td className="px-3 py-2">
                     <div className="flex flex-wrap gap-1 max-w-[130px] whitespace-break-spaces">
                       {contact.tags.length > 0 ? (

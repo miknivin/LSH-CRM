@@ -9,6 +9,8 @@ export interface ExtendedNextRequest extends NextRequest {
     userId: string;
     notes?: string;
     businessName?:string;
+    businessType?: 'B2B' | 'B2C';
+    city?: string;
     tags?:[];
     stage?:string;
     source?: string;
@@ -35,6 +37,14 @@ export async function validateContactRequest(req: ExtendedNextRequest) {
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return NextResponse.json(
         { error: "Invalid userId format" },
+        { status: 400 }
+      );
+    }
+
+    // Validate businessType enum
+    if (body.businessType && !["B2B", "B2C"].includes(body.businessType)) {
+      return NextResponse.json(
+        { error: "Invalid businessType: must be B2B or B2C" },
         { status: 400 }
       );
     }

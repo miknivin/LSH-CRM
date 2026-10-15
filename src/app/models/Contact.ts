@@ -52,6 +52,8 @@ export interface IContact extends Document {
   user?: Types.ObjectId;
   uid?: number;
   businessName?:string;
+  businessType?: 'B2B' | 'B2C';
+  city?: string;
   activities: Types.DocumentArray<Activity>;
   remarks: Types.DocumentArray<Remark>;
   createdAt: Date;
@@ -91,6 +93,15 @@ const contactSchema = new Schema<IContact, ContactModel>(
     },
     businessName: {
       type: String,
+    },
+    businessType: {
+      type: String,
+      enum: ['B2B', 'B2C'],
+    },
+    city: {
+      type: String,
+      trim: true,
+      maxLength: [100, 'City cannot exceed 100 characters'],
     },
     phone: {
       type: String,

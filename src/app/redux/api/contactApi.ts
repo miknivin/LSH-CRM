@@ -95,6 +95,9 @@ interface ContactRequest {
   notes?: string;
   tags?: string[];
   source?: string;
+  businessName?: string;
+  businessType?: 'B2B' | 'B2C';
+  city?: string;
   preferredVisitingTime?: string;
   numberOfPeople?: number | string;
   preferredNightsAndDays?: string;
@@ -144,6 +147,8 @@ interface UpdateContactRequest {
   notes?: string;
   tags?: { name: string }[]; // Send only name, backend sets user
   businessName?: string;
+  businessType?: 'B2B' | 'B2C';
+  city?: string;
   preferredVisitingTime?: string;
   numberOfPeople?: number | string;
   preferredNightsAndDays?: string;

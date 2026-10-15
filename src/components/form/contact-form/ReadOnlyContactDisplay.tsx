@@ -30,6 +30,8 @@ interface ContactData {
   phone: string;
   notes?: string;
   businessName?: string;
+  businessType?: string;
+  city?: string;
   source?: string;
   preferredVisitingTime?: string;
   numberOfPeople?: string;
@@ -43,6 +45,8 @@ const ReadOnlyContactDisplay: React.FC<ReadOnlyContactDisplayProps> = ({ contact
     phone: '',
     notes: '',
     businessName: '',
+    businessType: '',
+    city: '',
     source: '',
     preferredVisitingTime: '',
     numberOfPeople: '',
@@ -64,6 +68,8 @@ const ReadOnlyContactDisplay: React.FC<ReadOnlyContactDisplayProps> = ({ contact
         phone: contact.phone,
         notes: contact.notes || '',
         businessName: contact.businessName || '',
+        businessType: contact.businessType || '',
+        city: contact.city || '',
         source: contact.source || '',
         preferredVisitingTime: contact.preferredVisitingTime || '',
         numberOfPeople: contact.numberOfPeople !== undefined && contact.numberOfPeople !== null ? String(contact.numberOfPeople) : '',
@@ -154,6 +160,34 @@ const ReadOnlyContactDisplay: React.FC<ReadOnlyContactDisplayProps> = ({ contact
           className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
         >
           {contactData.businessName || 'N/A'}
+        </div>
+      </div>
+      <div>
+        <label
+          htmlFor="businessType"
+          className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-white"
+        >
+          Business Type
+        </label>
+        <div
+          id="businessType"
+          className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+        >
+          {contactData.businessType || 'N/A'}
+        </div>
+      </div>
+      <div>
+        <label
+          htmlFor="city"
+          className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-white"
+        >
+          City
+        </label>
+        <div
+          id="city"
+          className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+        >
+          {contactData.city || 'N/A'}
         </div>
       </div>
       <div>

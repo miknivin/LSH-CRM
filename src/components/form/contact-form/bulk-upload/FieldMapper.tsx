@@ -23,6 +23,8 @@ const contactFields: (keyof IContact)[] = [
   "phone",
   "notes",
   "businessName",
+  "businessType",
+  "city",
   "source",
   "probability",
   "value",
@@ -33,6 +35,7 @@ const contactFields: (keyof IContact)[] = [
 ];
 
 const fieldLabels: Partial<Record<keyof IContact, string>> = {
+  businessType: "Business Type (B2B/B2C)",
   preferredVisitingTime: "Preferred Visiting Time",
   numberOfPeople: "Number Of People",
   preferredNightsAndDays: "Preferred Nights & Days",

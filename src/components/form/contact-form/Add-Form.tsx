@@ -31,6 +31,8 @@ export default function AddContactForm({ onClose }: AddContactFormProps) {
     notes: "",
     userId: user ? user._id : "",
     businessName: "",
+    businessType: "" as "" | "B2B" | "B2C",
+    city: "",
     stage: defaultStage,
     tags: [] as string[],
     source: "",
@@ -88,6 +90,7 @@ export default function AddContactForm({ onClose }: AddContactFormProps) {
         ...formData,
         email: emailToSubmit,
         userId: formData.userId || "",
+        businessType: formData.businessType || undefined,
       }).unwrap();
       console.log("Contact created:", response.contact);
       setFormData({
@@ -97,6 +100,8 @@ export default function AddContactForm({ onClose }: AddContactFormProps) {
         notes: "",
         userId: formData.userId,
         businessName: "",
+        businessType: "",
+        city: "",
         stage: stages.length > 0 ? stages[0]._id : "",
         tags: [],
         source: "",
@@ -171,7 +176,7 @@ export default function AddContactForm({ onClose }: AddContactFormProps) {
             />
           </div>
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
             <label
               htmlFor="businessName"
@@ -187,6 +192,25 @@ export default function AddContactForm({ onClose }: AddContactFormProps) {
               onChange={handleInputChange}
               className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
             />
+          </div>
+          <div>
+            <label
+              htmlFor="businessType"
+              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+            >
+              Business Type
+            </label>
+            <select
+              id="businessType"
+              name="businessType"
+              value={formData.businessType}
+              onChange={handleInputChange}
+              className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
+            >
+              <option value="">Select type</option>
+              <option value="B2B">B2B</option>
+              <option value="B2C">B2C</option>
+            </select>
           </div>
           <div>
             <label
@@ -213,6 +237,22 @@ export default function AddContactForm({ onClose }: AddContactFormProps) {
               ))}
             </select>
           </div>
+        </div>
+        <div>
+          <label
+            htmlFor="city"
+            className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+          >
+            City
+          </label>
+          <input
+            type="text"
+            id="city"
+            name="city"
+            value={formData.city}
+            onChange={handleInputChange}
+            className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+          />
         </div>
         <SourceAutocomplete
           value={formData.source}
